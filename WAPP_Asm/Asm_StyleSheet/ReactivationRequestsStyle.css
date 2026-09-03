@@ -1,0 +1,441 @@
+﻿:root {
+    --card-bg: #ffffff;
+    --text-primary: #212529;
+    --text-secondary: #6c757d;
+    --accent-blue-bg: #e3f2fd;
+    --accent-blue-text: #1976d2;
+    --baby-blue: #dbeafe;
+    --primary-dark-blue: #08619c;
+    --btn-gray-bg: #e9ecef;
+    --border-color: #eaedf1;
+    /* Status Colors */
+    --status-pending-bg: #fff3cd;
+    --status-pending-text: #856404;
+    --status-approved-bg: #d1e7dd;
+    --status-approved-text: #0f5132;
+    --status-rejected-bg: #f8d7da;
+    --status-rejected-text: #842029;
+}
+
+body {
+    background-color: var(--bg-color);
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    color: var(--text-primary);
+    padding: 0;
+    margin: 0;
+}
+
+/* ── Navigation ── */
+.btn-back {
+    background-color: transparent;
+    color: var(--primary-dark-blue);
+    border: 2px solid var(--primary-dark-blue);
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.875rem;
+    font-family: 'Nunito', sans-serif;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 24px;
+    letter-spacing: 0.3px;
+    transition: all 0.2s ease;
+}
+
+    .btn-back:hover {
+        background-color: var(--primary-dark-blue);
+        color: #ffffff;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(8, 97, 156, 0.25);
+    }
+
+.main-heading {
+    font-weight: 800;
+    font-size: 2rem;
+    margin-bottom: 30px;
+    color: #000;
+    letter-spacing: -0.5px;
+}
+
+/* ── Cards ── */
+.card-sidebar {
+    background-color: var(--card-bg);
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    padding: 24px;
+    height: auto;
+    position: sticky;
+    top: 20px;
+}
+
+.card-main {
+    background-color: var(--card-bg);
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    padding: 24px;
+    min-height: 500px;
+}
+
+/* ── Appeal Form Card (suspended users) ── */
+.appeal-card {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+    padding: 40px;
+    max-width: 600px;
+    margin: 40px auto;
+    border-top: 5px solid var(--primary-dark-blue);
+}
+
+.appeal-title {
+    font-weight: 800;
+    font-size: 1.5rem;
+    color: var(--primary-dark-blue);
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.appeal-subtitle {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin-bottom: 30px;
+}
+
+.form-label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+.form-control {
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    padding: 10px 15px;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+}
+
+    .form-control:focus {
+        border-color: var(--accent-blue-text);
+        box-shadow: 0 0 0 3px var(--baby-blue);
+    }
+
+    .form-control:read-only {
+        background-color: #e9ecef;
+        cursor: not-allowed;
+    }
+
+.btn-submit-appeal {
+    background-color: var(--primary-dark-blue);
+    color: white;
+    font-weight: 700;
+    padding: 12px;
+    border-radius: 6px;
+    width: 100%;
+    border: none;
+    transition: all 0.2s;
+    margin-top: 10px;
+}
+
+    .btn-submit-appeal:hover {
+        background-color: #064a77;
+        transform: translateY(-1px);
+    }
+
+/* ── Sidebar ── */
+.sidebar-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.nav-link-custom {
+    display: block;
+    width: 100%;
+    padding: 12px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--text-primary);
+    font-weight: 500;
+    margin-bottom: 8px;
+    transition: all 0.2s;
+    border: none;
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+
+    .nav-link-custom:hover {
+        background-color: #f8f9fa;
+        color: #000;
+    }
+
+    .nav-link-custom.active {
+        background-color: var(--accent-blue-bg);
+        color: var(--accent-blue-text);
+        font-weight: 700;
+    }
+
+/* ── Content Header ── */
+.content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.content-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0;
+    color: #000;
+}
+
+/* ── Action Bar ── */
+.action-bar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+/* ── Approve Button — mirrors btn-edit from UserManagement ── */
+.btn-approve {
+    background-color: #d1e7dd;
+    color: #0f5132;
+    border: none;
+    padding: 8px 24px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.25s ease;
+    cursor: pointer;
+}
+
+    .btn-approve:hover:not(:disabled) {
+        background-color: #198754;
+        color: #ffffff;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 14px rgba(25, 135, 84, 0.3);
+    }
+
+    .btn-approve:active:not(:disabled) {
+        transform: translateY(0);
+        box-shadow: 0 3px 8px rgba(25, 135, 84, 0.2);
+    }
+
+    .btn-approve:disabled {
+        background-color: #f1f3f5;
+        color: #adb5bd;
+        box-shadow: none;
+        transform: none;
+        cursor: not-allowed;
+    }
+
+        .btn-approve:disabled:hover {
+            background-color: #f1f3f5;
+            color: #adb5bd;
+            box-shadow: none;
+            transform: none;
+        }
+
+/* ── Reject Button — mirrors btn-action (suspend/delete) from UserManagement ── */
+.btn-reject {
+    background-color: #f8d7da;
+    color: #842029;
+    border: none;
+    padding: 8px 24px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.25s ease;
+    cursor: pointer;
+}
+
+    .btn-reject:hover:not(:disabled) {
+        background-color: #dc3545;
+        color: #ffffff;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 14px rgba(220, 53, 69, 0.25);
+    }
+
+    .btn-reject:active:not(:disabled) {
+        transform: translateY(0);
+        box-shadow: 0 3px 8px rgba(220, 53, 69, 0.2);
+    }
+
+    .btn-reject:disabled {
+        background-color: #f1f3f5;
+        color: #adb5bd;
+        box-shadow: none;
+        transform: none;
+        cursor: not-allowed;
+    }
+
+        .btn-reject:disabled:hover {
+            background-color: #f1f3f5;
+            color: #adb5bd;
+            box-shadow: none;
+            transform: none;
+        }
+
+/* ── Grid / Table ── */
+.custom-grid {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    transition: box-shadow 0.3s ease;
+}
+
+    .custom-grid th {
+        background-color: var(--accent-blue-bg);
+        color: var(--accent-blue-text);
+        font-weight: 700;
+        padding: 12px 16px;
+        text-align: left;
+        border: none;
+        white-space: nowrap;
+    }
+
+        .custom-grid th:first-child {
+            border-top-left-radius: 8px;
+        }
+
+        .custom-grid th:last-child {
+            border-top-right-radius: 8px;
+        }
+
+    .custom-grid td {
+        padding: 14px 16px;
+        border: none;
+        border-bottom: 1px solid #f1f1f1;
+        vertical-align: top;
+        color: var(--text-primary);
+        background-color: var(--card-bg);
+    }
+
+    .custom-grid tbody tr {
+        background-color: #fafbfc;
+        transition: background-color 0.2s ease;
+        cursor: pointer;
+        vertical-align: top;
+    }
+
+        .custom-grid tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+    /* Selected row — matches UserManagement exactly */
+    .custom-grid .selected-row {
+        background-color: #dbeafe !important;
+        border-left: 4px solid var(--primary-dark-blue);
+    }
+
+        .custom-grid .selected-row td {
+            background-color: #dbeafe !important;
+        }
+
+        .custom-grid .selected-row:hover {
+            background-color: #bfdbfe !important;
+        }
+
+            .custom-grid .selected-row:hover td {
+                background-color: #bfdbfe !important;
+            }
+
+.link-proof {
+    color: var(--primary-dark-blue);
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-decoration: none;
+    border: 1px solid var(--primary-dark-blue);
+    padding: 4px 10px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+    .link-proof:hover {
+        background-color: var(--baby-blue);
+        color: #064a77;
+    }
+
+/* ── Status Badges ── */
+.badge-status {
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-pending {
+    background-color: var(--status-pending-bg);
+    color: var(--status-pending-text);
+}
+
+.status-approved {
+    background-color: var(--status-approved-bg);
+    color: var(--status-approved-text);
+}
+
+.status-rejected {
+    background-color: var(--status-rejected-bg);
+    color: var(--status-rejected-text);
+}
+
+/* ── Alert Panels ── */
+.alert-box {
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    font-weight: 500;
+    border: 1px solid transparent;
+    transition: opacity 0.5s ease;
+}
+
+    .alert-box.fade-out {
+        opacity: 0;
+    }
+
+.alert-success {
+    background-color: #d1e7dd;
+    color: #0f5132;
+    border-color: #badbcc;
+}
+
+.alert-error {
+    background-color: #f8d7da;
+    color: #842029;
+    border-color: #f5c2c7;
+}
+
+.alert-info {
+    background-color: #cff4fc;
+    color: #055160;
+    border-color: #b6effb;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    .action-bar {
+        flex-direction: column;
+    }
+
+    .btn-approve, .btn-reject {
+        width: 100%;
+    }
+}

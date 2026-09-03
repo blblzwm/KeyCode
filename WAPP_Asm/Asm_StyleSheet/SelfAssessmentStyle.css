@@ -1,0 +1,99 @@
+﻿.quiz-card {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 40px;
+    border: 1px solid rgba(15,23,42,.12);
+}
+
+.q-wrap {
+    margin-bottom: 35px;
+    padding: 20px; /* Added padding so background color looks better */
+    border-radius: 12px;
+    border: 1px solid #f1f5f9;
+    transition: all 0.3s ease;
+}
+
+.q-text {
+    font-size: 1.1rem;
+    color: #0f172a;
+}
+
+.quiz-options td {
+    padding: 8px 0;
+}
+
+.quiz-options label {
+    margin-left: 10px;
+    font-weight: 500;
+    color: #475569;
+}
+
+/* Floating Menu Styles */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.menu-trigger {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    padding: 8px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.dropdown-menu-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 40px;
+    background: white;
+    min-width: 200px;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    z-index: 100;
+    border: 1px solid #e2e8f0;
+}
+
+    .dropdown-menu-content a {
+        display: block;
+        padding: 10px 15px;
+        text-decoration: none;
+        color: #334155;
+    }
+
+        .dropdown-menu-content a:hover {
+            background: #f8fafc;
+        }
+
+.active {
+    display: block !important;
+}
+
+/* Edit Grid Layout */
+.options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 10px;
+    background: #f8fafc;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.edit-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+}
+
+/* Style for ghosted/disabled menu items */
+.aspNetDisabled {
+    color: #cbd5e1 !important; /* Light gray */
+    cursor: not-allowed !important;
+    opacity: 0.6;
+    text-decoration: none !important;
+    pointer-events: none; /* Prevents clicking entirely */
+}

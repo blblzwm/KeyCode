@@ -1,0 +1,203 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+    --primary-dark-blue: #08619c;
+    --primary-mid-blue: #1976d2;
+    --primary-light-blue: #e3f2fd;
+    --accent-cyan: #2EA3C9;
+    --bg-dark: #0a1628;
+    --bg-card: #ffffff;
+    --text-primary: #0f172a;
+    --text-secondary: #64748b;
+    --border-color: #e2e8f0;
+}
+
+body {
+    font-family: 'Nunito', sans-serif;
+    background-color: #f0f6ff;
+    color: var(--text-primary);
+}
+
+.btn-back {
+    background-color: transparent;
+    color: var(--primary-dark-blue);
+    border: 2px solid var(--primary-dark-blue);
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.875rem;
+    font-family: 'Nunito', sans-serif;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 24px;
+    letter-spacing: 0.3px;
+    transition: all 0.2s ease;
+}
+
+    .btn-back:hover {
+        background-color: var(--primary-dark-blue);
+        color: #ffffff;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(8, 97, 156, 0.25);
+    }
+
+/* ─── TAB BAR ─── */
+.tab-bar {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 28px;
+    background: #ffffff;
+    padding: 6px;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(8, 97, 156, 0.1);
+    width: fit-content;
+    border: 1px solid var(--primary-light-blue);
+}
+
+.tab-btn {
+    padding: 10px 28px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    font-family: 'Nunito', sans-serif;
+    cursor: pointer;
+    background: transparent;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+}
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, #08619c 0%, #2EA3C9 100%);
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(8, 97, 156, 0.35);
+    }
+
+    .tab-btn:hover:not(.active) {
+        background: var(--primary-light-blue);
+        color: var(--primary-dark-blue);
+    }
+
+.tab-content {
+    display: none;
+}
+
+    .tab-content.active {
+        display: block;
+        animation: fadeInUp 0.3s ease;
+    }
+
+/* ─── GRID ─── */
+.col-md-4 {
+    position: relative;
+    width: 100%;
+    padding-right: 15px;
+    padding-left: 15px;
+}
+
+@media (min-width: 768px) {
+    .col-md-4 {
+        flex: 0 0 33.333%;
+        max-width: 33.333%;
+    }
+}
+
+/* ─── SUMMARY CARDS ─── */
+.summary-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 22px 20px;
+    text-align: center;
+    box-shadow: 0 4px 16px rgba(8, 97, 156, 0.08);
+    margin-bottom: 24px;
+    border: 1px solid var(--primary-light-blue);
+    border-top: 3px solid var(--primary-dark-blue);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+    .summary-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #08619c, #2EA3C9);
+        border-radius: 14px 14px 0 0;
+    }
+
+    .summary-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(8, 97, 156, 0.15);
+    }
+
+    .summary-card .value {
+        font-size: 2.2rem;
+        font-weight: 900;
+        font-family: 'Nunito', sans-serif;
+        color: var(--primary-dark-blue);
+        line-height: 1.2;
+    }
+
+    .summary-card .label {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-top: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+/* ─── CHARTS ─── */
+.analytics-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 4px 16px rgba(8, 97, 156, 0.07);
+    margin-bottom: 24px;
+    border: 1px solid var(--primary-light-blue);
+    transition: box-shadow 0.2s ease;
+}
+
+    .analytics-card:hover {
+        box-shadow: 0 6px 24px rgba(8, 97, 156, 0.12);
+    }
+
+.chart-title {
+    font-size: 1rem;
+    font-weight: 800;
+    margin-bottom: 16px;
+    color: var(--primary-dark-blue);
+    font-family: 'Nunito', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+    .chart-title::before {
+        content: '';
+        display: inline-block;
+        width: 4px;
+        height: 18px;
+        background: linear-gradient(180deg, #08619c, #2EA3C9);
+        border-radius: 2px;
+        flex-shrink: 0;
+    }
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

@@ -1,0 +1,319 @@
+﻿
+.profile-card {
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+    padding: 35px 40px;
+    max-width: 900px;
+    margin: 30px auto;
+    font-weight: 500;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+
+.profile-header {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+    .profile-header h2 {
+        justify-self: center;
+    }
+
+.center-title {
+    text-align: center;
+    margin: 0;
+    font-size: 30px;
+    font-weight: 700;
+}
+
+.back-btn {
+    background: linear-gradient(180deg, #64748b 0%, #475569 100%);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.avatar-wrapper {
+    text-align: center;
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #e5e7eb;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    display: block;
+    margin: 0 auto 15px auto;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+    .profile-avatar:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+
+.avatar-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+    .avatar-actions .verify-btn {
+        padding: 6px 12px;
+        font-size: 13px;
+        height: 36px;
+    }
+
+    /* force error message to new line */
+    .avatar-actions .validator-text {
+        width: 100%;
+        text-align: center;
+        margin-top: 4px;
+    }
+
+.file-clean {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 6px 10px;
+    height: 36px;
+    font-size: 13px;
+    background: #fff;
+}
+
+.profile-title {
+    font-size: 1.7rem;
+    font-weight: 800;
+    color: var(--primary-dark-blue, #1d395e);
+    margin: 0;
+}
+
+.section-header {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: #334155;
+    margin: 24px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #e5e7eb;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    opacity: 0.85;
+}
+
+.detail-item {
+    display: flex;
+    padding: 10px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+    .detail-item:last-child {
+        border-bottom: none;
+    }
+
+    .detail-item .value {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+#btnShowPassword {
+    margin-top: 8px;
+}
+
+.label {
+    width: 180px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #64748b;
+    letter-spacing: 0.4px;
+}
+
+.value {
+    color: #1e293b;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0;
+}
+
+.verify-panel {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    padding: 14px;
+    border-radius: 12px;
+    margin-top: 8px;
+    width: 220px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    align-self: flex-start;
+    backdrop-filter: blur(6px);
+}
+
+    .verify-panel input {
+        width: 100%;
+        padding: 6px 8px;
+        margin-bottom: 10px;
+        border-radius: 9px;
+        font-size: 0.85rem;
+    }
+
+    .verify-panel .verify-btn {
+        width: 100%;
+        font-size: 0.85rem;
+        padding: 6px;
+    }
+
+.password-msg {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.1px;
+    color: #475569;
+}
+
+    /* success */
+    .password-msg.success {
+        color: #15803d;
+    }
+
+    /* error */
+    .password-msg.error {
+        color: #7f1d1d;
+    }
+
+.verify-btn {
+    background: linear-gradient(180deg, #2c4a75 0%, #1d395e 100%);
+    color: #ffffff;
+    border: none;
+    padding: 7px 14px;
+    border-radius: 14px;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 800;
+    font-size: 0.80rem;
+    letter-spacing: 0.6px;
+    box-shadow: 0 4px 12px rgba(29,57,94,0.25);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+    .verify-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(29,57,94,0.35);
+    }
+
+    .verify-btn:active {
+        transform: scale(0.97);
+        box-shadow: 0 2px 6px rgba(29,57,94,0.25);
+    }
+
+.value .verify-btn {
+    margin-left: 0;
+}
+
+.validation-summary {
+    background: #fee2e2;
+    border: 1px solid #fecaca;
+    color: #7f1d1d;
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin-bottom: 18px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+    .validation-summary ul {
+        margin: 0;
+        padding-left: 18px;
+    }
+
+.validation-error {
+    display: block;
+    color: #7f1d1d;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-top: 2px;
+}
+
+.success-msg {
+    display: block;
+    background: #ecfdf5;
+    border: 2px solid #22c55e;
+    color: #065f46;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 18px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+    animation: slideDown 0.25s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.detail-item:hover {
+    background: #f8fafc;
+    border-radius: 6px;
+    padding-left: 6px;
+    transition: all 0.15s ease;
+}
+
+.verify-panel {
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.validator-text {
+    color: dimgrey;
+    font-size: 0.70rem;
+    font-weight: 500;
+    display: block;
+    margin-top: 8px;
+    margin-bottom: 10px;
+    margin-left: 5px;
+}
+
+.upload-hidden {
+    visibility: hidden;
+    height: 0;
+    overflow: hidden;
+}
+
+.upload-visible {
+    visibility: visible;
+    height: auto;
+    margin-top: 10px;
+}
+

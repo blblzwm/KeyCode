@@ -1,0 +1,1 @@
+﻿<%@ WebHandler Language="C#" Class="WAPP_Asm.Asm_WebPage.AskAI" %>
