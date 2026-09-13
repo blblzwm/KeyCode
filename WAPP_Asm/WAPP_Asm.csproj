@@ -479,13 +479,6 @@
     <None Include="packages.config" />
     <Content Include="Scripts\jquery-3.7.0.slim.min.map" />
     <Content Include="Scripts\jquery-3.7.0.min.map" />
-    <None Include="Web.config.template" />
-    <None Include="Web.config.Debug.template">
-      <DependentUpon>Web.config.template</DependentUpon>
-    </None>
-    <None Include="Web.config.Release.template">
-      <DependentUpon>Web.config.template</DependentUpon>
-    </None>
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
