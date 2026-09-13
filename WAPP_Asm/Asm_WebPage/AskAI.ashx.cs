@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text;
 using System.Web;
 using System.Web.Script.Serialization;
@@ -45,10 +44,14 @@ namespace WAPP_Asm.Asm_WebPage
                 string output = data.ContainsKey("output") ? (data["output"] ?? "").ToString() : "";
                 string question = data.ContainsKey("question") ? (data["question"] ?? "").ToString() : "";
 
-                string apiKey = ConfigurationManager.AppSettings["GroqKey"];
+                // 1. Get Gemini Key and Model from Web.config
+                string apiKey = ConfigurationManager.AppSettings["GeminiKey"];
+                string modelName = ConfigurationManager.AppSettings["GeminiModel"] ?? "gemini-flash-lite-latest";
+                modelName = modelName.Trim().Replace("models/", "");
+
                 if (string.IsNullOrWhiteSpace(apiKey))
                 {
-                    SseSend(context, "error", "{\"error\":\"Missing GroqKey in Web.config <appSettings>.\"}");
+                    SseSend(context, "error", "{\"error\":\"Missing GeminiKey in Web.config <appSettings>.\"}");
                     SseDone(context);
                     return;
                 }
@@ -61,21 +64,22 @@ namespace WAPP_Asm.Asm_WebPage
                     "Output/Error:\n" + output + "\n\n" +
                     "Question:\n" + question;
 
-                string url = "https://api.groq.com/openai/v1/chat/completions";
-                string model = "llama-3.1-8b-instant";
+                // 2. Use Gemini Streaming Endpoint (?alt=sse)
+                string url = $"https://generativelanguage.googleapis.com/v1beta/models/{Uri.EscapeDataString(modelName)}:streamGenerateContent?alt=sse&key={apiKey}";
 
+                // 3. Use Gemini Payload Format
                 var payload = new
                 {
-                    model = model,
-                    messages = new object[]
+                    systemInstruction = new { parts = new[] { new { text = "You are a strict but friendly Python tutor." } } },
+                    contents = new[]
                     {
-                        new { role = "system", content = "You are a strict but friendly Python tutor." },
-                        new { role = "user", content = prompt }
+                        new { role = "user", parts = new[] { new { text = prompt } } }
                     },
-                    temperature = 0.4,
-                    top_p = 1,
-                    max_tokens = 300,
-                    stream = true
+                    generationConfig = new
+                    {
+                        temperature = 0.4,
+                        maxOutputTokens = 300
+                    }
                 };
 
                 string json = serializer.Serialize(payload);
@@ -83,20 +87,19 @@ namespace WAPP_Asm.Asm_WebPage
                 using (var client = new HttpClient())
                 {
                     client.Timeout = TimeSpan.FromSeconds(60);
-
                     client.DefaultRequestHeaders.Clear();
-                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
 
                     var req = new HttpRequestMessage(HttpMethod.Post, url);
                     req.Content = new StringContent(json, Encoding.UTF8, "application/json");
 
+                    // SendAsync with ResponseHeadersRead is required for streaming!
                     var resp = client.SendAsync(req, HttpCompletionOption.ResponseHeadersRead)
                                      .GetAwaiter().GetResult();
 
                     if (!resp.IsSuccessStatusCode)
                     {
                         string err = resp.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                        string safe = JsonEscape("Groq API error (" + (int)resp.StatusCode + "): " + err);
+                        string safe = JsonEscape("Gemini API error (" + (int)resp.StatusCode + "): " + err);
                         SseSend(context, "error", "{\"error\":\"" + safe + "\"}");
                         SseDone(context);
                         return;
@@ -109,24 +112,22 @@ namespace WAPP_Asm.Asm_WebPage
                         {
                             string line = sr.ReadLine();
                             if (line == null) break;
-
                             if (line.Length == 0) continue;
 
+                            // Gemini sends chunks starting with "data: " just like OpenAI/Groq
                             if (line.StartsWith("data:"))
                             {
                                 string dataLine = line.Substring(5).Trim();
 
-                                if (dataLine == "[DONE]")
-                                {
-                                    SseDone(context);
-                                    return;
-                                }
-
+                                // Gemini does not send a [DONE] string at the end.
+                                // It just closes the stream when finished.
                                 SseSend(context, "chunk", dataLine);
                             }
                         }
                     }
                 }
+
+                // Once stream is done reading, close SSE gracefully
                 SseDone(context);
             }
             catch (Exception ex)

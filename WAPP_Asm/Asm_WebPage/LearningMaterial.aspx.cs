@@ -670,7 +670,7 @@ namespace WAPP_Asm.Asm_WebPage
             if (string.IsNullOrWhiteSpace(text)) return;
             rblOptions.Items.Add(new ListItem(text, key));
         }
-        
+
         protected void btnSubmit_Click(object sender, EventArgs e)
         {
             pnlPractice.Visible = true;
@@ -757,7 +757,7 @@ END;";
         {
             if (Role == "tutor")
                 Response.Redirect(ResolveUrl("~/Asm_WebPage/TutorDashboard.aspx"));
-            else if (Role =="admin")
+            else if (Role == "admin")
                 Response.Redirect(ResolveUrl("~/Asm_WebPage/AdminDashboard.aspx"));
             else
                 Response.Redirect(ResolveUrl("~/Asm_WebPage/StudentDashboard.aspx"));
@@ -1365,12 +1365,25 @@ WHERE subtopicID=@sid AND isDeleted=0;";
                     }
 
                     if (evt === 'chunk') {
-                        // data 是 Groq 的 json chunk: { choices:[{delta:{content:""...""}}] }
+                        // Support Gemini chunks and the existing handler's chunk format.
                         try {
                             var obj = JSON.parse(data);
-                            var delta = obj && obj.choices && obj.choices[0] && obj.choices[0].delta
-                                ? (obj.choices[0].delta.content || '')
-                                : '';
+                            var delta = '';
+                            var candidate = obj && obj.candidates && obj.candidates[0];
+                            var contentParts = candidate && candidate.content
+                                ? candidate.content.parts : null;
+
+                            if (Array.isArray(contentParts)) {
+                                for (var k = 0; k < contentParts.length; k++) {
+                                    var part = contentParts[k];
+                                    if (part && !part.thought && typeof part.text === 'string') {
+                                        delta += part.text;
+                                    }
+                                }
+                            } else if (obj && obj.choices && obj.choices[0] && obj.choices[0].delta) {
+                                // Keep working until AskAI.ashx is migrated to Gemini.
+                                delta = obj.choices[0].delta.content || '';
+                            }
 
                             if (delta) msg.textContent += delta;
                         } catch (e) {

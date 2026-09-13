@@ -15,15 +15,6 @@ namespace WAPP_Asm.Asm_WebPage
     {
 
         /// <summary>
-        /// btnBackDash control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.LinkButton btnBackDash;
-
-        /// <summary>
         /// lblChapterTitle control.
         /// </summary>
         /// <remarks>

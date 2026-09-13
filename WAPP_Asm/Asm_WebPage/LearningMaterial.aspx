@@ -67,12 +67,7 @@
 
         <div class="top-nav">
             <div class="nav-left">
-                <asp:LinkButton ID="btnBackDash" runat="server" 
-                    CssClass="top-nav-item nav-back-btn" 
-                    OnClick="btnBackDash_Click"
-                    OnClientClick="return confirm('Do you want to exit? Your progress will be lost.');">
-                    « Back to Dashboard
-                </asp:LinkButton>
+
 
                 <div class="chapter-wrap" title="<%= lblChapterTitle.Text %>">
                     <asp:Label ID="lblChapterTitle" runat="server" CssClass="nav-chapter-title" />
@@ -495,6 +490,23 @@
                     const MIN_LEFT = 420;
                     const MIN_RIGHT = 520;
 
+                    function fitLearningPanes() {
+                        if (getComputedStyle(split).flexDirection === "column") {
+                            left.style.flex = "";
+                            return;
+                        }
+                        const available = split.clientWidth - vBar.offsetWidth;
+                        const maxLeft = Math.max(MIN_LEFT, available - MIN_RIGHT);
+                        const current = left.getBoundingClientRect().width;
+                        if (current > maxLeft) left.style.flex = `0 0 ${maxLeft}px`;
+                    }
+                    if (window.ResizeObserver) {
+                        new ResizeObserver(fitLearningPanes).observe(split);
+                    } else {
+                        window.addEventListener("resize", fitLearningPanes);
+                    }
+                    fitLearningPanes();
+
                     let startX = 0;
                     let startLeftW = 0;
                     let draggingV = false;
@@ -638,4 +650,24 @@
         })();
     </script>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const sidebar = document.getElementById("dashSidebar");
+            if (!sidebar) return;
+            const dashboard = Array.from(sidebar.querySelectorAll("a.side-nav-item")).find(function (link) {
+                const url = new URL(link.href, location.href);
+                return /\/(Student|Tutor|Admin)Dashboard\.aspx$/i.test(url.pathname)
+                    && url.searchParams.get("tab") !== "game";
+            });
+            if (!dashboard) return;
+            <% string dashboardRole = Convert.ToString(Session["role"]).Trim().ToLowerInvariant(); %>
+            dashboard.href = '<%= ResolveUrl(dashboardRole == "tutor" ? "~/Asm_WebPage/TutorDashboard.aspx" : dashboardRole == "admin" ? "~/Asm_WebPage/AdminDashboard.aspx" : "~/Asm_WebPage/StudentDashboard.aspx") %>';
+            dashboard.addEventListener("click", function (event) {
+                if (!window.confirm("Leave this learning page and return to Dashboard? Unsaved code or edits may be lost.")) {
+                    event.preventDefault();
+                    event.stopImmediatePropagation();
+                }
+            });
+        });
+    </script>
 </asp:Content>
