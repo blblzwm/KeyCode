@@ -24,15 +24,6 @@ namespace WAPP_Asm
         protected global::System.Web.UI.WebControls.Literal litSubWelcome;
 
         /// <summary>
-        /// rptStudentDashboard control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Repeater rptStudentDashboard;
-
-        /// <summary>
         /// pnlOverall control.
         /// </summary>
         /// <remarks>
@@ -49,5 +40,23 @@ namespace WAPP_Asm
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Literal litOverallPercent;
+
+        /// <summary>
+        /// rptStudentDashboard control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Repeater rptStudentDashboard;
+
+        /// <summary>
+        /// pnlBonusQuizzes control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlBonusQuizzes;
     }
 }

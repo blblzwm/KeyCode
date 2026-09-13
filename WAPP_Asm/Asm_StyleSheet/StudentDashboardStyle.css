@@ -26,7 +26,7 @@ body {
     margin: 18px 0 14px;
 }
 
-.dash-title{
+.dash-title {
     font-size: 42px;
     font-weight: 950;
     letter-spacing: -0.6px;
@@ -70,7 +70,7 @@ body {
 
 /* left thumb */
 .course-thumb {
-    position: relative; 
+    position: relative;
     width: 400px;
     height: 200px;
     flex: 0 0 400px;
@@ -313,7 +313,7 @@ body {
 }
 
     .hero-clean-title span {
-        color: #2563eb; 
+        color: #2563eb;
         font-weight: 750;
     }
 
@@ -338,6 +338,7 @@ html, body {
 
 .page, main, .content, .container, .wrapper, .dash-wrap, .dashboard-wrap {
     background: transparent !important;
+}
 
     .page::before, main::before, .content::before, .container::before,
     .page::after, main::after, .content::after, .container::after,
@@ -345,3 +346,35 @@ html, body {
         content: none !important;
         background: none !important;
     }
+
+#gameTrialsLeft {
+    font-weight: 700;
+    color: #2563eb;
+}
+
+.minigame-locked {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 6px;
+    padding: 32px 20px;
+}
+
+.minigame-locked-icon {
+    font-size: 30px;
+    margin-bottom: 4px;
+}
+
+.minigame-locked-title {
+    font-size: 18px;
+    font-weight: 900;
+    color: #0f172a;
+}
+
+.minigame-locked-desc {
+    font-size: 14px;
+    color: #64748b;
+    max-width: 360px;
+    margin-bottom: 10px;
+}

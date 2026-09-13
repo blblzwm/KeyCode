@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data.SqlClient;
+using System.Web.Script.Serialization;
 
 namespace WAPP_Asm
 {
@@ -10,14 +11,351 @@ namespace WAPP_Asm
         private string Cs => ConfigurationManager.ConnectionStrings["KeyCodeDB"].ConnectionString;
 
         protected int OverallProgressPercent = 0;
+        protected bool IsGuestForPage = false;
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            IsGuestForPage = IsGuest();
+            string ajaxAction = Request.QueryString["ajax"];
+            if (!string.IsNullOrEmpty(ajaxAction))
+            {
+                HandleRewardAjax(ajaxAction);
+                return;
+            }
+
             if (!IsPostBack)
             {
                 BindDashboard();
             }
         }
+
+        // ===================== Reward system (badges + XP + bonus quizzes) =====================
+
+        // Fixed, deterministic reward per milestone — not random, since the badge/XP/quiz
+        // attached to each milestone is specific content, not a chance draw.
+        private class RewardDef
+        {
+            public string Name;
+            public string Icon;
+            public int Xp;
+        }
+
+        private static readonly Dictionary<int, RewardDef> RewardConfig = new Dictionary<int, RewardDef>
+        {
+            { 20, new RewardDef { Name = "Rookie Coder",     Icon = "🐣", Xp = 30 } },
+            { 40, new RewardDef { Name = "Loop Ninja",       Icon = "🥷", Xp = 50 } },
+            { 60, new RewardDef { Name = "Debug Detective",  Icon = "🕵️", Xp = 70 } },
+            { 80, new RewardDef { Name = "Code Wizard",      Icon = "🧙", Xp = 100 } }
+        };
+
+        // Shape of each answer the client submits for grading a bonus quiz.
+        private class BonusAnswer
+        {
+            public int questionID { get; set; }
+            public string selected { get; set; }
+        }
+
+        private void HandleRewardAjax(string action)
+        {
+            Response.Clear();
+            Response.ContentType = "application/json";
+            var serializer = new JavaScriptSerializer();
+
+            string studentId = CurrentStudentId();
+
+            if (IsGuest())
+            {
+                Response.StatusCode = 401;
+                Response.Write(serializer.Serialize(new { error = "not_logged_in" }));
+                Response.End();
+                return;
+            }
+
+            try
+            {
+                if (action == "list" && Request.HttpMethod == "GET")
+                {
+                    Response.Write(serializer.Serialize(GetClaimedRewards(studentId)));
+                }
+                else if (action == "claim" && Request.HttpMethod == "POST")
+                {
+                    int percent;
+                    int.TryParse(Request.Form["percent"], out percent);
+
+                    if (!RewardConfig.ContainsKey(percent))
+                    {
+                        Response.StatusCode = 400;
+                        Response.Write(serializer.Serialize(new { error = "invalid_percent" }));
+                    }
+                    else
+                    {
+                        var result = ClaimMilestone(studentId, percent);
+                        Response.Write(serializer.Serialize(result));
+                    }
+                }
+                else if (action == "bonusquiz" && Request.HttpMethod == "GET")
+                {
+                    int percent;
+                    int.TryParse(Request.QueryString["percent"], out percent);
+
+                    if (!RewardConfig.ContainsKey(percent))
+                    {
+                        Response.StatusCode = 400;
+                        Response.Write(serializer.Serialize(new { error = "invalid_percent" }));
+                    }
+                    else if (!HasClaimedMilestone(studentId, percent))
+                    {
+                        Response.StatusCode = 403;
+                        Response.Write(serializer.Serialize(new { error = "not_unlocked" }));
+                    }
+                    else
+                    {
+                        var questions = GetBonusQuizQuestions(percent);
+                        Response.Write(serializer.Serialize(new { questions = questions }));
+                    }
+                }
+                else if (action == "bonusquizsubmit" && Request.HttpMethod == "POST")
+                {
+                    int percent;
+                    int.TryParse(Request.Form["percent"], out percent);
+                    string answersJson = Request.Form["answers"] ?? "[]";
+
+                    if (!RewardConfig.ContainsKey(percent))
+                    {
+                        Response.StatusCode = 400;
+                        Response.Write(serializer.Serialize(new { error = "invalid_percent" }));
+                    }
+                    else if (!HasClaimedMilestone(studentId, percent))
+                    {
+                        Response.StatusCode = 403;
+                        Response.Write(serializer.Serialize(new { error = "not_unlocked" }));
+                    }
+                    else
+                    {
+                        var answers = serializer.Deserialize<List<BonusAnswer>>(answersJson);
+                        var result = GradeBonusQuiz(percent, answers);
+                        Response.Write(serializer.Serialize(result));
+                    }
+                }
+                else
+                {
+                    Response.StatusCode = 400;
+                    Response.Write(serializer.Serialize(new { error = "bad_request" }));
+                }
+            }
+            catch (Exception ex)
+            {
+                Response.StatusCode = 500;
+                Response.Write(serializer.Serialize(new { error = "server_error", message = ex.Message }));
+            }
+
+            Response.End();
+        }
+
+        private object GetClaimedRewards(string studentId)
+        {
+            var list = new List<object>();
+            int totalXp = 0;
+
+            using (var con = new SqlConnection(Cs))
+            using (var cmd = new SqlCommand(
+                "SELECT milestonePercent, badgeName, badgeIcon, xpAwarded FROM StudentRewards WHERE userID=@uid", con))
+            {
+                cmd.Parameters.AddWithValue("@uid", studentId);
+                con.Open();
+                using (var dr = cmd.ExecuteReader())
+                {
+                    while (dr.Read())
+                    {
+                        int xp = Convert.ToInt32(dr["xpAwarded"]);
+                        totalXp += xp;
+
+                        list.Add(new
+                        {
+                            percent = Convert.ToInt32(dr["milestonePercent"]),
+                            badgeName = dr["badgeName"].ToString(),
+                            badgeIcon = dr["badgeIcon"].ToString(),
+                            xpAwarded = xp
+                        });
+                    }
+                }
+            }
+
+            return new { rewards = list, totalXp = totalXp };
+        }
+
+        private bool HasClaimedMilestone(string studentId, int percent)
+        {
+            using (var con = new SqlConnection(Cs))
+            using (var cmd = new SqlCommand(
+                "SELECT COUNT(*) FROM StudentRewards WHERE userID=@uid AND milestonePercent=@p", con))
+            {
+                cmd.Parameters.AddWithValue("@uid", studentId);
+                cmd.Parameters.AddWithValue("@p", percent);
+                con.Open();
+                return Convert.ToInt32(cmd.ExecuteScalar()) > 0;
+            }
+        }
+
+        private object ClaimMilestone(string studentId, int percent)
+        {
+            using (var con = new SqlConnection(Cs))
+            {
+                con.Open();
+
+                // Already claimed? Return the same reward so re-opening the modal is consistent.
+                using (var cmdCheck = new SqlCommand(
+                    "SELECT badgeName, badgeIcon, xpAwarded FROM StudentRewards WHERE userID=@uid AND milestonePercent=@p", con))
+                {
+                    cmdCheck.Parameters.AddWithValue("@uid", studentId);
+                    cmdCheck.Parameters.AddWithValue("@p", percent);
+
+                    using (var dr = cmdCheck.ExecuteReader())
+                    {
+                        if (dr.Read())
+                        {
+                            return new
+                            {
+                                percent = percent,
+                                badgeName = dr["badgeName"].ToString(),
+                                badgeIcon = dr["badgeIcon"].ToString(),
+                                xpAwarded = Convert.ToInt32(dr["xpAwarded"]),
+                                alreadyClaimed = true
+                            };
+                        }
+                    }
+                }
+
+                var def = RewardConfig[percent];
+
+                try
+                {
+                    using (var cmdInsert = new SqlCommand(@"
+                        INSERT INTO StudentRewards (userID, milestonePercent, badgeName, badgeIcon, xpAwarded, dateClaimed)
+                        VALUES (@uid, @p, @name, @icon, @xp, GETDATE())", con))
+                    {
+                        cmdInsert.Parameters.AddWithValue("@uid", studentId);
+                        cmdInsert.Parameters.AddWithValue("@p", percent);
+                        cmdInsert.Parameters.AddWithValue("@name", def.Name);
+                        cmdInsert.Parameters.AddWithValue("@icon", def.Icon);
+                        cmdInsert.Parameters.AddWithValue("@xp", def.Xp);
+                        cmdInsert.ExecuteNonQuery();
+                    }
+                }
+                catch (SqlException ex) when (ex.Number == 2627 || ex.Number == 2601)
+                {
+                    // Unique constraint hit = a second tab/request claimed it a moment earlier.
+                    using (var cmdRefetch = new SqlCommand(
+                        "SELECT badgeName, badgeIcon, xpAwarded FROM StudentRewards WHERE userID=@uid AND milestonePercent=@p", con))
+                    {
+                        cmdRefetch.Parameters.AddWithValue("@uid", studentId);
+                        cmdRefetch.Parameters.AddWithValue("@p", percent);
+
+                        using (var dr = cmdRefetch.ExecuteReader())
+                        {
+                            if (dr.Read())
+                            {
+                                return new
+                                {
+                                    percent = percent,
+                                    badgeName = dr["badgeName"].ToString(),
+                                    badgeIcon = dr["badgeIcon"].ToString(),
+                                    xpAwarded = Convert.ToInt32(dr["xpAwarded"]),
+                                    alreadyClaimed = true
+                                };
+                            }
+                        }
+                    }
+
+                    throw;
+                }
+
+                return new
+                {
+                    percent = percent,
+                    badgeName = def.Name,
+                    badgeIcon = def.Icon,
+                    xpAwarded = def.Xp,
+                    alreadyClaimed = false
+                };
+            }
+        }
+
+        private List<object> GetBonusQuizQuestions(int percent)
+        {
+            var list = new List<object>();
+
+            using (var con = new SqlConnection(Cs))
+            using (var cmd = new SqlCommand(@"
+                SELECT questionID, questionText, optionA, optionB, optionC, optionD
+                FROM BonusQuizQuestions
+                WHERE milestonePercent=@p
+                ORDER BY questionID", con))
+            {
+                cmd.Parameters.AddWithValue("@p", percent);
+                con.Open();
+                using (var dr = cmd.ExecuteReader())
+                {
+                    while (dr.Read())
+                    {
+                        list.Add(new
+                        {
+                            questionID = Convert.ToInt32(dr["questionID"]),
+                            questionText = dr["questionText"].ToString(),
+                            optionA = dr["optionA"].ToString(),
+                            optionB = dr["optionB"].ToString(),
+                            optionC = dr["optionC"].ToString(),
+                            optionD = dr["optionD"].ToString()
+                        });
+                    }
+                }
+            }
+
+            return list;
+        }
+
+        private object GradeBonusQuiz(int percent, List<BonusAnswer> answers)
+        {
+            var correctMap = new Dictionary<int, string>();
+
+            using (var con = new SqlConnection(Cs))
+            using (var cmd = new SqlCommand(
+                "SELECT questionID, correctOption FROM BonusQuizQuestions WHERE milestonePercent=@p", con))
+            {
+                cmd.Parameters.AddWithValue("@p", percent);
+                con.Open();
+                using (var dr = cmd.ExecuteReader())
+                {
+                    while (dr.Read())
+                    {
+                        correctMap[Convert.ToInt32(dr["questionID"])] = dr["correctOption"].ToString();
+                    }
+                }
+            }
+
+            var results = new List<object>();
+            int score = 0;
+
+            foreach (var qid in correctMap.Keys)
+            {
+                string correctOption = correctMap[qid];
+                var submitted = answers?.Find(a => a.questionID == qid);
+                bool isCorrect = submitted != null &&
+                    string.Equals(submitted.selected, correctOption, StringComparison.OrdinalIgnoreCase);
+
+                if (isCorrect) score++;
+
+                results.Add(new
+                {
+                    questionID = qid,
+                    correct = isCorrect,
+                    correctOption = correctOption
+                });
+            }
+
+            return new { results = results, score = score, total = correctMap.Count };
+        }
+
 
         private bool IsGuest()
         {
@@ -43,6 +381,7 @@ namespace WAPP_Asm
             }
 
             pnlOverall.Visible = !isGuest;
+            pnlBonusQuizzes.Visible = !isGuest;
 
             var list = new List<CourseRow>();
 
