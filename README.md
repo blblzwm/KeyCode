@@ -8,11 +8,11 @@ An interactive educational web application designed to teach programming concept
 - [Project Overview](#project-overview)
 - [Tech Stack](#tech-stack)
 - [Getting Started](#getting-started)
+- [Setup Instructions](#setup-instructions)
+- [Database Setup](#database-setup)
 - [Project Structure](#project-structure)
 - [Key Features](#key-features)
 - [User Roles](#user-roles)
-- [Database](#database)
-- [API Integration](#api-integration)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -65,7 +65,9 @@ KeyCode is a full-stack ASP.NET Web Forms application built to make programming 
 - SQL Server 2019 or later (or SQL Server Express with LocalDB)
 - Active internet connection for API services
 
-### Installation
+## Setup Instructions
+
+### Quick Start (30 minutes)
 
 1. **Clone the repository**
    ```bash
@@ -73,36 +75,119 @@ KeyCode is a full-stack ASP.NET Web Forms application built to make programming 
    cd KeyCode
    ```
 
-2. **Open the solution**
+2. **Setup Database**
+   - Open SQL Server Management Studio
+   - Connect to: `(LocalDB)\MSSQLLocalDB`
+   - Run scripts from `Database/` folder in order:
+     - Run: `01_CreateDatabase.sql`
+     - Run: `02_CreateTables.sql`
+     - (Optional) Run: `03_InsertSampleData.sql`
+   - See `Database/README.md` for detailed instructions
+
+3. **Configure Web.config**
+   ```bash
+   cd WAPP_Asm
+   # Edit Web.config with your API keys (see section below)
+   cd ..
    ```
-   Open WAPP_Asm.slnx in Visual Studio
+
+4. **Open and Run in Visual Studio**
+   - Open `WAPP_Asm.slnx` in Visual Studio
+   - NuGet packages will restore automatically
+   - Press `F5` to run
+   - App opens at: `https://localhost:44302`
+
+### 🔑 Getting API Keys for Testing
+
+You'll need to get your own API keys from these services. Copy `Web.config.example` to `Web.config` and add your keys:
+
+#### 1. Google Gemini API Key
+- Go to: https://aistudio.google.com/app/apikey
+- Click "Get API Key"
+- Copy the key to `Web.config`:
+  ```xml
+  <add key="GeminiKey" value="YOUR_KEY_HERE" />
+  ```
+
+#### 2. Google reCAPTCHA v3
+- Go to: https://www.google.com/recaptcha/admin
+- Create a new site
+- Add keys to `Web.config`:
+  ```xml
+  <add key="RecaptchaSiteKey" value="YOUR_SITE_KEY_HERE" />
+  <add key="RecaptchaSecretKey" value="YOUR_SECRET_KEY_HERE" />
+  ```
+
+#### 3. Google OAuth 2.0
+- Go to: https://console.cloud.google.com
+- Create OAuth 2.0 credentials
+- Add to `Web.config`:
+  ```xml
+  <add key="GoogleClientId" value="YOUR_CLIENT_ID_HERE" />
+  <add key="GoogleRedirectUri" value="https://localhost:44302/Asm_WebPage/GoogleAuth.aspx" />
+  ```
+
+#### 4. OpenAI Moderation API (Optional)
+- Go to: https://platform.openai.com/account/api-keys
+- Create API key
+- Add to `Web.config`:
+  ```xml
+  <add key="OpenAIModerationKey" value="YOUR_KEY_HERE" />
+  ```
+
+#### 5. Gmail SMTP (For password reset emails)
+- Go to: Google Account → Security → App passwords
+- Generate app-specific password
+- Add to `Web.config`:
+  ```xml
+  <network 
+      host="smtp.gmail.com" 
+      port="587" 
+      userName="your-email@gmail.com" 
+      password="YOUR_APP_PASSWORD" />
+  ```
+
+⚠️ **Important**: Never commit `Web.config` to Git - it's in `.gitignore`
+
+## Database Setup
+
+The application uses SQL Server LocalDB. The database file (`KeyCodeDB.mdf`) cannot be uploaded to GitHub.
+
+### Option 1: Using SQL Files (Recommended)
+
+SQL setup scripts are provided in the `Database/` folder to recreate the database schema:
+
+```bash
+# Open SQL Server Management Studio (LocalDB)
+# Server name: (LocalDB)\MSSQLLocalDB
+# Run the scripts in order:
+# 1. Database/01_CreateDatabase.sql
+# 2. Database/02_CreateTables.sql
+# 3. Database/03_InsertSampleData.sql (optional)
+```
+
+### Option 2: Automatic Database Creation
+
+The application will automatically create the database on first run if it doesn't exist. You'll need to:
+
+1. Ensure LocalDB is installed (comes with Visual Studio)
+2. The connection string in `Web.config` should be:
+   ```xml
+   <add name="KeyCodeDB" 
+        connectionString="Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=|DataDirectory|\KeyCodeDB.mdf;Integrated Security=True" 
+        providerName="System.Data.SqlClient" />
    ```
+3. Run the application - database will be created automatically
 
-3. **Install NuGet packages**
-   - Right-click solution → "Restore NuGet Packages"
-   - Or run: `dotnet restore`
+### Verify Database
 
-4. **Configure the database**
-   - The application uses LocalDB with SQL Server
-   - Database file: `App_Data/KeyCodeDB.mdf`
-   - Connection string in `Web.config`:
-	 ```xml
-	 <add name="KeyCodeDB" 
-		  connectionString="Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=|DataDirectory|\KeyCodeDB.mdf;Integrated Security=True" 
-		  providerName="System.Data.SqlClient" />
-	 ```
-
-5. **Configure API keys** (in `Web.config`)
-   - Google Gemini API Key
-   - reCAPTCHA Site and Secret Keys
-   - Google OAuth Client ID
-   - OpenAI Moderation API Key
-
-   ⚠️ **Security Note**: Never commit API keys to version control. Use environment variables or user secrets in production.
-
-6. **Run the application**
-   - Press `F5` or click "Start" in Visual Studio
-   - Default URL: `https://localhost:44302` (adjust port as needed)
+After setup, verify the database:
+```bash
+# In SQL Server Management Studio
+# Connect to: (LocalDB)\MSSQLLocalDB
+# Check: KeyCodeDB database exists
+# Check: All tables are created
+```
 
 ## Project Structure
 
