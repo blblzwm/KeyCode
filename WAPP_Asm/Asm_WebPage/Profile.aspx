@@ -1,12 +1,12 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Profile.aspx.cs" Inherits="WAPP_Asm.Asm_WebPage.Profile" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="HeadContent" runat="server">
-    <link href="<%= ResolveUrl("~/Asm_StyleSheet/ProfileStyle.css") %>" rel="stylesheet"/>
+    <link href="<%= ResolveUrl("~/Asm_StyleSheet/ProfileStyle.css?v=profile-horizontal-2") %>" rel="stylesheet"/>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
 
-<div class="profile-card">
+<div class="profile-shell"><div class="profile-card">
 
     <asp:Label ID="lblProfileMsg"
         runat="server"
@@ -23,7 +23,7 @@
             CausesValidation="false" />
 
         <!-- CENTER: Title -->
-        <h2 class="profile-title center-title">My Profile</h2>
+        <h2 class="profile-title center-title">Profile</h2>
 
         <!-- RIGHT: Edit -->
         <asp:Button ID="btnEdit" runat="server"
@@ -34,6 +34,7 @@
 
     </div>
 
+    <div class="profile-top">
     <!-- Avatar -->
     <div class="avatar-wrapper">
 
@@ -66,6 +67,7 @@
 
     </div>
 
+    <div class="profile-fields">
     <!-- Account -->
     <h4 class="section-header">Account Information</h4>
 
@@ -237,7 +239,7 @@
                     ID="reqQualification"
                     runat="server"
                     ControlToValidate="ddlQualification"
-                    InitialValues=""
+                    InitialValue=""
                     ErrorMessage="ⓘ Qualification is required."
                     CssClass="validation-error"
                     Display="Dynamic" />
@@ -247,41 +249,66 @@
     </asp:Panel>
 
     <!-- Security -->
-    <h4 class="section-header">Security</h4>
+    <asp:Panel
+        ID="pnlSecurity"
+        runat="server"
+        Visible="false">
 
-    <div class="detail-item">
-        <span class="label">Password</span>
-        <span class="value">
+        <h4 class="section-header">Security</h4>
 
-            <asp:Button ID="btnShowPassword" runat="server"
-                Text="Change Password"
-                CssClass="verify-btn"
-                OnClick="btnShowPassword_Click"
-                CausesValidation="false" />
+        <div class="detail-item">
+            <span class="label">Password</span>
 
-            <asp:Panel ID="pnlPassword" runat="server" Visible="false" CssClass="verify-panel">
-
-                <asp:TextBox ID="txtCurrentPassword" runat="server"
-                    TextMode="Password" placeholder="Current password" />
-
-                <asp:TextBox ID="txtNewPassword" runat="server"
-                    TextMode="Password" placeholder="New password" />
-
-                <asp:TextBox ID="txtConfirmPassword" runat="server"
-                    TextMode="Password" placeholder="Confirm new password" />
-
-                <asp:Button ID="btnChangePassword" runat="server"
-                    Text="Update Password"
+            <span class="value">
+                <asp:Button
+                    ID="btnShowPassword"
+                    runat="server"
+                    Text="Change Password"
                     CssClass="verify-btn"
-                    OnClick="btnChangePassword_Click"
+                    OnClick="btnShowPassword_Click"
                     CausesValidation="false" />
 
-            </asp:Panel>
+                <asp:Panel
+                    ID="pnlPassword"
+                    runat="server"
+                    Visible="false"
+                    CssClass="verify-panel">
 
-            <asp:Label ID="lblPasswordMsg" runat="server" CssClass="password-msg" />
+                    <asp:TextBox
+                        ID="txtCurrentPassword"
+                        runat="server"
+                        TextMode="Password"
+                        placeholder="Current password" />
 
-        </span>
-    </div>
+                    <asp:TextBox
+                        ID="txtNewPassword"
+                        runat="server"
+                        TextMode="Password"
+                        placeholder="New password" />
+
+                    <asp:TextBox
+                        ID="txtConfirmPassword"
+                        runat="server"
+                        TextMode="Password"
+                        placeholder="Confirm new password" />
+
+                    <asp:Button
+                        ID="btnChangePassword"
+                        runat="server"
+                        Text="Update Password"
+                        CssClass="verify-btn"
+                        OnClick="btnChangePassword_Click"
+                        CausesValidation="false" />
+                </asp:Panel>
+
+                <asp:Label
+                    ID="lblPasswordMsg"
+                    runat="server"
+                    CssClass="password-msg" />
+            </span>
+        </div>
+
+    </asp:Panel>
 
     <asp:Panel ID="pnlEditActions" runat="server" Visible="false" style="margin-top:20px;">
         
@@ -298,7 +325,8 @@
         CausesValidation="false" />
     </asp:Panel>
 
-</div>
+</div></div></div>
+<div class="profile-lower"><%= RenderForumActivity() %><%= RenderAssessmentScores() %></div></div>
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
@@ -306,6 +334,7 @@
             const input = document.querySelector("#<%= fuAvatar.ClientID %>");
             const avatar = document.querySelector("#<%= imgAvatar.ClientID %>");
 
+            if (!input || !avatar) return;
             input.addEventListener("change", function () {
                 const file = this.files[0];
                 if (file) {
@@ -315,5 +344,4 @@
 
         });
     </script>
-
 </asp:Content>

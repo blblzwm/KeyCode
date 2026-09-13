@@ -330,6 +330,15 @@ namespace WAPP_Asm.Asm_WebPage
         protected global::System.Web.UI.WebControls.RequiredFieldValidator reqQualification;
 
         /// <summary>
+        /// pnlSecurity control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlSecurity;
+
+        /// <summary>
         /// btnShowPassword control.
         /// </summary>
         /// <remarks>

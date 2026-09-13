@@ -1,4 +1,6 @@
-﻿using System;
+﻿using System.Data;
+using System.Web;
+using System;
 using System.Configuration;
 using System.Data.SqlClient;
 using System.Web.UI;
@@ -12,25 +14,232 @@ namespace WAPP_Asm.Asm_WebPage
     {
         string cs = ConfigurationManager.ConnectionStrings["KeyCodeDB"].ConnectionString;
 
+
+        protected string RenderForumActivity()
+        {
+            string user = Convert.ToString(Session["UserID"]);
+            string profile = Convert.ToString(ViewState["ProfileUserID"]);
+            if (string.IsNullOrWhiteSpace(user) || !string.Equals(user, profile, StringComparison.OrdinalIgnoreCase)) return "";
+            var html = new System.Text.StringBuilder("<section class='profile-forum-activity'><h3>My Forum Activity</h3><p>Private to you · up to 20 recent items per section</p>");
+            string[] titles = { "Liked Posts", "Liked Comments", "View History", "My Posts", "My Replies" };
+            string[] queries = {
+                "SELECT TOP (20) p.postID,p.title AS caption,l.created_at AS eventDate FROM ForumPostLikes l JOIN ForumPosts p ON p.postID=l.postID WHERE l.userID=@User ORDER BY l.created_at DESC",
+                "SELECT TOP (20) c.postID,c.content AS caption,l.created_at AS eventDate FROM ForumCommentLikes l JOIN ForumComments c ON c.commentID=l.commentID WHERE l.userID=@User ORDER BY l.created_at DESC",
+                "SELECT TOP (20) p.postID,p.title AS caption,h.viewed_at AS eventDate FROM ForumViewHistory h JOIN ForumPosts p ON p.postID=h.postID WHERE h.userID=@User ORDER BY h.viewed_at DESC",
+                "SELECT TOP (20) postID,title AS caption,created_at AS eventDate FROM ForumPosts WHERE userID=@User ORDER BY created_at DESC",
+                "SELECT TOP (20) c.postID,c.content AS caption,c.created_at AS eventDate FROM ForumComments c WHERE c.userID=@User AND c.is_ai=0 ORDER BY c.created_at DESC"
+            };
+            try
+            {
+                using (SqlConnection con = new SqlConnection(cs))
+                {
+                    con.Open();
+                    for (int i = 0; i < queries.Length; i++)
+                    {
+                        html.Append("<details><summary>" + titles[i] + "<span class='activity-chevron' aria-hidden='true'>›</span></summary><ul>");
+                        using (SqlCommand cmd = new SqlCommand(queries[i], con))
+                        {
+                            cmd.Parameters.Add("@User", SqlDbType.NVarChar, 50).Value = user;
+                            using (SqlDataReader r = cmd.ExecuteReader())
+                            {
+                                bool any = false;
+                                while (r.Read())
+                                {
+                                    any = true;
+                                    string caption = Convert.ToString(r["caption"]);
+                                    if (caption.Length > 160) caption = caption.Substring(0, 160) + "…";
+                                    string url = ResolveUrl("~/Asm_WebPage/Forum.aspx") + "?post=" + HttpUtility.UrlEncode(Convert.ToString(r["postID"]));
+                                    html.Append("<li><a href='" + HttpUtility.HtmlAttributeEncode(url) + "'>" + Server.HtmlEncode(caption) + "</a><small>" + Convert.ToDateTime(r["eventDate"]).ToString("dd MMM yyyy") + "</small></li>");
+                                }
+                                if (!any) html.Append("<li>No activity yet.</li>");
+                            }
+                        }
+                        html.Append("</ul></details>");
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                System.Diagnostics.Trace.TraceError("Forum activity query failed: {0}", ex.Number);
+                return "<section class='profile-forum-activity'><h3>My Forum Activity</h3><p>Activity is temporarily unavailable.</p></section>";
+            }
+            return html.Append("</section>").ToString();
+        }
+
+        protected string RenderAssessmentScores()
+        {
+            string user = Convert.ToString(ViewState["ProfileUserID"]);
+            if (string.IsNullOrWhiteSpace(user) || !CanManageProfile(user)) return "";
+            var html = new System.Text.StringBuilder("<aside class='profile-scores'><h3>Chapter scores</h3><p>Self-assessment results · best recorded score</p>");
+            try
+            {
+                using (var con = new SqlConnection(cs))
+                using (var cmd = new SqlCommand(@"SELECT c.title, MAX(r.score) AS score, COUNT(r.resultID) AS attempts
+                    FROM Chapters c LEFT JOIN AssessmentResults r ON r.chapterID=c.chapterID AND r.userID=@User
+                    WHERE EXISTS (SELECT 1 FROM Users WHERE userID=@User AND role='Student')
+                    GROUP BY c.chapterID,c.title ORDER BY c.chapterID", con))
+                {
+                    cmd.Parameters.Add("@User", SqlDbType.NVarChar, 50).Value = user;
+                    con.Open();
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        bool any = false;
+                        while (reader.Read())
+                        {
+                            any = true;
+                            html.Append("<div class='chapter-score'><span>" + Server.HtmlEncode(Convert.ToString(reader["title"])) +
+                                "</span><strong>" + (reader["score"] == DBNull.Value ? "Not attempted" : Server.HtmlEncode(Convert.ToString(reader["score"]))) + "</strong><small>" + Convert.ToString(reader["attempts"]) + " recorded attempts</small></div>");
+                        }
+                        if (!any) return "";
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                System.Diagnostics.Trace.TraceError("Profile scores failed: {0}", ex.Number);
+                html.Append("<p>Scores are temporarily unavailable.</p>");
+            }
+            return html.Append("</aside>").ToString();
+        }
+
         protected void Page_Load(object sender, EventArgs e)
         {
             if (Session["UserID"] == null)
             {
-                Response.Redirect("Login.aspx");
+                Response.Redirect(
+                    ResolveUrl("~/Asm_WebPage/Login.aspx"),
+                    false
+                );
+
+                Context.ApplicationInstance.CompleteRequest();
                 return;
             }
 
             if (!IsPostBack)
             {
-                string profileId = !string.IsNullOrEmpty(Request.QueryString["id"])
-                    ? Request.QueryString["id"]
+                string profileId =
+                    !string.IsNullOrWhiteSpace(
+                        Request.QueryString["id"])
+                    ? Request.QueryString["id"].Trim()
                     : Session["UserID"].ToString();
 
-                ViewState["ProfileUserID"] = profileId;
-                FetchUserProfile(profileId);
+                if (!CanManageProfile(profileId))
+                {
+                    throw new HttpException(
+                        403,
+                        "You are not authorized to view this profile."
+                    );
+                }
 
-                bool isOwnProfile = profileId == Session["UserID"].ToString();
-                btnShowPassword.Visible = isOwnProfile;
+                ViewState["ProfileUserID"] = profileId;
+
+                FetchUserProfile(profileId);
+            }
+            else
+            {
+                RequireProfilePermission();
+            }
+
+            ConfigureProfileAccess();
+            ConfigureDobLimits();
+        }
+
+        private void ConfigureProfileAccess()
+        {
+            string profileId =
+                ViewState["ProfileUserID"]?.ToString() ?? "";
+
+            string currentUserId =
+                Session["UserID"]?.ToString() ?? "";
+
+            string profileRole =
+                ViewState["ProfileRole"]?.ToString() ?? "";
+
+            bool isOwnProfile = string.Equals(
+                profileId,
+                currentUserId,
+                StringComparison.OrdinalIgnoreCase
+            );
+
+            bool usesLocalPassword =
+                profileRole.Equals(
+                    "Tutor",
+                    StringComparison.OrdinalIgnoreCase
+                ) ||
+                profileRole.Equals(
+                    "Admin",
+                    StringComparison.OrdinalIgnoreCase
+                );
+
+            // Students and Admins viewing Tutor profiles do not see it.
+            pnlSecurity.Visible =
+                isOwnProfile && usesLocalPassword;
+
+            if (!pnlSecurity.Visible)
+                pnlPassword.Visible = false;
+        }
+
+        private void ConfigureDobLimits()
+        {
+            string profileRole =
+                ViewState["ProfileRole"]?.ToString() ?? "";
+
+            int minimumAge =
+                profileRole.Equals(
+                    "Student",
+                    StringComparison.OrdinalIgnoreCase
+                )
+                ? 8
+                : 18;
+
+            const int maximumAge = 100;
+
+            txtDOB.Attributes["max"] =
+                DateTime.Today
+                    .AddYears(-minimumAge)
+                    .ToString("yyyy-MM-dd");
+
+            txtDOB.Attributes["min"] =
+                DateTime.Today
+                    .AddYears(-maximumAge)
+                    .ToString("yyyy-MM-dd");
+        }
+
+        private void RequireLocalPasswordOwner()
+        {
+            RequireProfilePermission();
+
+            string profileId =
+                ViewState["ProfileUserID"]?.ToString() ?? "";
+
+            string currentUserId =
+                Session["UserID"]?.ToString() ?? "";
+
+            string profileRole =
+                ViewState["ProfileRole"]?.ToString() ?? "";
+
+            bool isOwnProfile = string.Equals(
+                profileId,
+                currentUserId,
+                StringComparison.OrdinalIgnoreCase
+            );
+
+            bool usesLocalPassword =
+                profileRole.Equals(
+                    "Tutor",
+                    StringComparison.OrdinalIgnoreCase
+                ) ||
+                profileRole.Equals(
+                    "Admin",
+                    StringComparison.OrdinalIgnoreCase
+                );
+
+            if (!isOwnProfile || !usesLocalPassword)
+            {
+                throw new HttpException(
+                    403,
+                    "Password management is not available for this account."
+                );
             }
         }
 
@@ -47,6 +256,12 @@ namespace WAPP_Asm.Asm_WebPage
 
                 if (reader.Read())
                 {
+                    bool googleLinked =
+                        reader["google_subject"] != DBNull.Value &&
+                        !string.IsNullOrWhiteSpace(
+                            reader["google_subject"].ToString());
+
+                    ViewState["GoogleLinked"] = googleLinked;
                     lblUserID.Text = reader["userID"].ToString();
                     lblUsername.Text = reader["username"].ToString();
                     lblFname.Text = reader["fname"].ToString();
@@ -89,8 +304,72 @@ namespace WAPP_Asm.Asm_WebPage
             }
         }
 
+        private bool CanManageProfile(string targetUserId)
+        {
+            string currentUserId = Session["UserID"]?.ToString();
+            string currentRole = Session["role"]?.ToString();
+
+            if (string.IsNullOrWhiteSpace(currentUserId))
+                return false;
+
+            // Everyone may manage only their own profile.
+            if (string.Equals(
+                currentUserId,
+                targetUserId,
+                StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            // Only Admin may manage another account.
+            if (!string.Equals(
+                currentRole,
+                "Admin",
+                StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            // According to your current UI, Admin manages Tutor profiles.
+            using (SqlConnection conn = new SqlConnection(cs))
+            using (SqlCommand cmd = new SqlCommand(@"
+        SELECT role
+        FROM dbo.Users
+        WHERE userID = @id", conn))
+            {
+                cmd.Parameters.Add(
+                    "@id",
+                    SqlDbType.NVarChar,
+                    50).Value = targetUserId;
+
+                conn.Open();
+
+                string targetRole = cmd.ExecuteScalar()?.ToString();
+
+                return string.Equals(
+                    targetRole,
+                    "Tutor",
+                    StringComparison.OrdinalIgnoreCase);
+            }
+        }
+
+        private void RequireProfilePermission()
+        {
+            string targetUserId =
+                ViewState["ProfileUserID"]?.ToString();
+
+            if (string.IsNullOrWhiteSpace(targetUserId) ||
+                !CanManageProfile(targetUserId))
+            {
+                throw new HttpException(
+                    403,
+                    "You are not authorized to manage this profile.");
+            }
+        }
+
         protected void btnUploadAvatar_Click(object sender, EventArgs e)
         {
+            RequireProfilePermission();
             lblAvatarMsg.Text = "";
             lblAvatarMsg.Visible = false;
 
@@ -150,6 +429,7 @@ namespace WAPP_Asm.Asm_WebPage
 
         protected void btnRemoveAvatar_Click(object sender, EventArgs e)
         {
+            RequireProfilePermission();
             string userId = ViewState["ProfileUserID"].ToString();
 
             using (SqlConnection conn = new SqlConnection(cs))
@@ -179,15 +459,32 @@ namespace WAPP_Asm.Asm_WebPage
             Response.Redirect(Request.RawUrl);
         }
 
-        protected void btnShowPassword_Click(object sender, EventArgs e)
+        protected void btnShowPassword_Click(
+    object sender,
+    EventArgs e)
         {
+            RequireLocalPasswordOwner();
+
             pnlPassword.Visible = !pnlPassword.Visible;
+
             lblPasswordMsg.Text = "";
             lblPasswordMsg.CssClass = "password-msg";
         }
 
         protected void btnChangePassword_Click(object sender, EventArgs e)
         {
+            RequireLocalPasswordOwner();
+
+            string targetUserId = ViewState["ProfileUserID"]?.ToString();
+
+            if (!string.Equals(
+                targetUserId,
+                Session["UserID"]?.ToString(),
+                StringComparison.OrdinalIgnoreCase))
+            {
+                throw new HttpException(403, "Forbidden");
+            }
+
             if (Session["PasswordChanged"] != null)
             {
                 lblPasswordMsg.Text = "ⓘ You can only change your password once per session.";
@@ -291,6 +588,7 @@ namespace WAPP_Asm.Asm_WebPage
 
         protected void btnEdit_Click(object sender, EventArgs e)
         {
+            RequireProfilePermission();
             lblProfileMsg.Visible = false;
             ToggleEdit(true);
 
@@ -318,9 +616,12 @@ namespace WAPP_Asm.Asm_WebPage
 
             string returnUrl = Request.QueryString["returnUrl"];
 
-            if (!string.IsNullOrEmpty(returnUrl))
+            if (!string.IsNullOrWhiteSpace(returnUrl) &&
+                Uri.TryCreate(returnUrl, UriKind.Relative, out Uri localUri) &&
+                !returnUrl.StartsWith("//"))
             {
-                Response.Redirect(returnUrl);
+                Response.Redirect(returnUrl, false);
+                Context.ApplicationInstance.CompleteRequest();
                 return;
             }
 
@@ -364,8 +665,17 @@ namespace WAPP_Asm.Asm_WebPage
                 lblProfileMsg.Visible = false;
             }
 
-            txtUsername.Visible = edit;
-            lblUsername.Visible = !edit;
+            bool googleLinked =
+    ViewState["GoogleLinked"] != null &&
+    Convert.ToBoolean(ViewState["GoogleLinked"]);
+
+            bool mayEditEmail = edit && !googleLinked;
+
+            txtEmail.Visible = mayEditEmail;
+            lblEmail.Visible = !mayEditEmail;
+
+            reqEmail.Enabled = mayEditEmail;
+            revEmail.Enabled = mayEditEmail;
 
             if (edit)
                 txtUsername.Text = lblUsername.Text;
@@ -377,9 +687,6 @@ namespace WAPP_Asm.Asm_WebPage
 
             btnSave.Visible = edit;
             btnCancel.Visible = edit;
-
-            txtEmail.Visible = edit;
-            lblEmail.Visible = !edit;
 
             ddlQualification.Visible = edit && pnlProfessional.Visible;
             lblQualification.Visible = !edit;
@@ -398,8 +705,6 @@ namespace WAPP_Asm.Asm_WebPage
             revFname.Enabled = edit;
             reqLname.Enabled = edit;
             revLname.Enabled = edit;
-            reqEmail.Enabled = edit;
-            revEmail.Enabled = edit;
 
             reqQualification.Enabled = edit && pnlProfessional.Visible;
 
@@ -420,6 +725,7 @@ namespace WAPP_Asm.Asm_WebPage
 
         protected void btnSave_Click(object sender, EventArgs e)
         {
+            RequireProfilePermission();
             lblUsernameMsg.Visible = false;
             lblUsernameMsg.Text = "";
             lblEmailMsg.Visible = false;
@@ -449,9 +755,27 @@ namespace WAPP_Asm.Asm_WebPage
             string role = ViewState["ProfileRole"]?.ToString() ?? "";
             bool isTutor = role.Equals("Tutor", StringComparison.OrdinalIgnoreCase);
 
-            if (isTutor && (age < 18 || age > 100))
+            bool isStudent =
+                role.Equals(
+                    "Student",
+                    StringComparison.OrdinalIgnoreCase
+                );
+
+            bool isAdmin =
+                role.Equals(
+                    "Admin",
+                    StringComparison.OrdinalIgnoreCase
+                );
+
+            int minimumAge = isStudent ? 5 : 18;
+
+            if (age < minimumAge || age > 100)
             {
-                lblDOBMsg.Text = "ⓘ Tutor age must be between 18 and 100.";
+                lblDOBMsg.Text =
+                    "ⓘ Age must be between " +
+                    minimumAge +
+                    " and 100.";
+
                 lblDOBMsg.Visible = true;
                 return;
             }
@@ -511,23 +835,66 @@ namespace WAPP_Asm.Asm_WebPage
                     return;
                 }
 
+                string firstName = txtFname.Text.Trim();
+                string lastName = txtLname.Text.Trim();
+
+                if (firstName.Length > 50 || lastName.Length > 50)
+                {
+                    lblProfileMsg.Text =
+                        "ⓘ First and last names must not exceed 50 characters.";
+
+                    lblProfileMsg.CssClass = "validation-error";
+                    lblProfileMsg.Visible = true;
+                    return;
+                }
+
                 SqlCommand cmd = new SqlCommand(@"
-                    UPDATE Users SET
-                        username = @u,
+                    UPDATE dbo.Users
+                    SET username = @u,
                         fname = @f,
                         lname = @l,
-                        email = @e,
+                        email =
+                            CASE
+                                WHEN google_subject IS NULL THEN @e
+                                ELSE email
+                            END,
                         dob = @dob,
                         qualification = @q
                     WHERE userID = @id", conn);
 
-                cmd.Parameters.AddWithValue("@u", txtUsername.Text.Trim());
-                cmd.Parameters.AddWithValue("@f", txtFname.Text.Trim());
-                cmd.Parameters.AddWithValue("@l", txtLname.Text.Trim());
-                cmd.Parameters.AddWithValue("@e", txtEmail.Text.Trim());
-                cmd.Parameters.AddWithValue("@dob", dob);
-                cmd.Parameters.AddWithValue("@q", (object)qualification ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@id", ViewState["ProfileUserID"]);
+                cmd.Parameters.Add(
+                    "@u",
+                    SqlDbType.NVarChar,
+                    50).Value = txtUsername.Text.Trim();
+
+                cmd.Parameters.Add(
+                    "@f",
+                    SqlDbType.NVarChar,
+                    50).Value = firstName;
+
+                cmd.Parameters.Add(
+                    "@l",
+                    SqlDbType.NVarChar,
+                    50).Value = lastName;
+
+                cmd.Parameters.Add(
+                    "@e",
+                    SqlDbType.NVarChar,
+                    256).Value = txtEmail.Text.Trim().ToLowerInvariant();
+
+                cmd.Parameters.Add(
+                    "@dob",
+                    SqlDbType.Date).Value = dob.Date;
+
+                cmd.Parameters.Add(
+                    "@q",
+                    SqlDbType.NVarChar,
+                    50).Value = (object)qualification ?? DBNull.Value;
+
+                cmd.Parameters.Add(
+                    "@id",
+                    SqlDbType.NVarChar,
+                    50).Value = ViewState["ProfileUserID"].ToString();
 
                 cmd.ExecuteNonQuery();
             }
