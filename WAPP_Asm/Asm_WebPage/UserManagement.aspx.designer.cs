@@ -15,15 +15,6 @@ namespace WAPP_Asm.Asm_WebPage
     {
 
         /// <summary>
-        /// lnkBack control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.HyperLink lnkBack;
-
-        /// <summary>
         /// btnStudent control.
         /// </summary>
         /// <remarks>
@@ -60,6 +51,15 @@ namespace WAPP_Asm.Asm_WebPage
         protected global::System.Web.UI.WebControls.TextBox txtSearch;
 
         /// <summary>
+        /// btnCreate control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnCreate;
+
+        /// <summary>
         /// btnEdit control.
         /// </summary>
         /// <remarks>
@@ -85,15 +85,6 @@ namespace WAPP_Asm.Asm_WebPage
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Button btnDelete;
-
-        /// <summary>
-        /// btnCreate control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnCreate;
 
         /// <summary>
         /// gvUsers control.

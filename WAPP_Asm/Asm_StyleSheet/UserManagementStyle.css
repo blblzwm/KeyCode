@@ -473,3 +473,444 @@ body {
         width: 100%;
     }
 }
+
+/* User listing layout only: AddTutors.aspx also uses this stylesheet. */
+.um-page {
+    min-width: 0;
+}
+
+    .um-page .main-heading {
+        margin-bottom: 20px;
+    }
+
+    .um-page .um-role-tabs {
+        display: flex;
+        gap: 6px;
+        width: fit-content;
+        max-width: 100%;
+        padding: 5px;
+        margin-bottom: 24px;
+        border: 1px solid #dce6f1;
+        border-radius: 14px;
+        background: #edf3f9;
+    }
+
+        .um-page .um-role-tabs .nav-link-custom {
+            width: auto;
+            min-width: 130px;
+            margin: 0;
+            padding: 12px 22px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 10px;
+        }
+
+            .um-page .um-role-tabs .nav-link-custom.active {
+                background: #08619c;
+                color: #fff;
+                box-shadow: 0 2px 6px #08619c26;
+            }
+
+            .um-page .um-role-tabs .nav-link-custom:focus-visible {
+                outline: 3px solid #659de1;
+                outline-offset: 2px;
+            }
+
+    .um-page .um-list-area, .um-page .card-main {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .um-page .um-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+
+        .um-page .um-toolbar .search-box {
+            flex: 1 1 260px;
+            max-width: 440px;
+        }
+
+            .um-page .um-toolbar .search-box input {
+                width: 100%;
+                min-height: 44px;
+            }
+
+        .um-page .um-toolbar .btn-create {
+            min-height: 44px;
+        }
+
+    .um-page .action-bar {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .um-page .left-actions {
+        flex-wrap: wrap;
+    }
+
+    .um-page .um-table-scroll {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+@media (max-width: 600px) {
+    .um-page {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+        .um-page .card-main {
+            padding: 16px;
+        }
+
+        .um-page .um-role-tabs {
+            width: 100%;
+        }
+
+            .um-page .um-role-tabs .nav-link-custom {
+                flex: 1;
+                min-width: 0;
+            }
+
+        .um-page .um-toolbar .search-box {
+            flex-basis: 100%;
+            max-width: none;
+        }
+
+        .um-page .um-toolbar .right-actions {
+            width: 100%;
+        }
+}
+
+/* Page heading and switcher share one row ABOVE the white user panel. */
+.um-page .um-page-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px 24px;
+    width: 100%;
+    margin-bottom: 24px;
+}
+
+    .um-page .um-page-heading .main-heading {
+        margin: 0;
+        min-width: 0;
+    }
+
+    .um-page .um-page-heading .um-role-tabs {
+        flex: 0 0 auto;
+        width: auto;
+        max-width: 100%;
+        margin: 0 0 0 auto;
+    }
+
+@media (max-width: 600px) {
+    .um-page .um-page-heading .um-role-tabs {
+        width: 100%;
+    }
+}
+
+.um-heading-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+    width: 100%;
+    margin-bottom: 24px;
+}
+
+    .um-heading-row .main-heading {
+        margin: 0;
+    }
+
+.um-heading-switcher {
+    display: flex;
+    gap: 6px;
+    margin-left: auto;
+    padding: 5px;
+    border: 1px solid #dce6f1;
+    border-radius: 14px;
+    background: #edf3f9;
+}
+
+    .um-heading-switcher .nav-link-custom {
+        width: auto;
+        min-width: 130px;
+        margin: 0;
+        padding: 12px 22px;
+        border-radius: 10px;
+        text-align: center;
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+        .um-heading-switcher .nav-link-custom.active {
+            background: #08619c;
+            color: white;
+        }
+
+.um-full-column {
+    flex: 0 0 100%;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    padding: 0 15px;
+}
+
+@media (max-width: 600px) {
+    .um-heading-switcher {
+        width: 100%;
+    }
+
+        .um-heading-switcher .nav-link-custom {
+            flex: 1;
+            min-width: 0;
+        }
+}
+
+.um-page .card-main {
+    padding-bottom: 70px;
+}
+
+/* Remove table and selected-row borders */
+table.custom-grid,
+table.custom-grid tr,
+table.custom-grid th,
+table.custom-grid td {
+    border: 0 !important;
+}
+
+/* Keep the blue selected-row background */
+.custom-grid .selected-row td {
+    background-color: #dbeafe !important;
+}
+
+/* Compact Students / Tutors switcher */
+.um-page .um-role-tabs,
+.um-page .um-heading-switcher {
+    gap: 4px;
+    padding: 4px;
+    border-radius: 11px;
+}
+
+    .um-page .um-role-tabs .nav-link-custom,
+    .um-page .um-heading-switcher .nav-link-custom {
+        min-width: 100px;
+        padding: 8px 16px;
+        margin-bottom: 0;
+        font-size: 14px;
+        line-height: 1.5;
+        border-radius: 8px;
+    }
+
+@media (max-width: 600px) {
+    .um-page .um-role-tabs .nav-link-custom,
+    .um-page .um-heading-switcher .nav-link-custom {
+        min-width: 0;
+    }
+}
+/* Fixed User Management workspace. Shared Add Tutor form is unaffected. */
+html.um-viewport, html.um-viewport body {
+    height: 100%;
+    overflow: hidden;
+}
+
+    html.um-viewport .page {
+        min-height: 0;
+    }
+
+.um-fixed-page {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+    .um-fixed-page .um-heading-row {
+        flex: 0 0 auto;
+        gap: 12px;
+        margin-bottom: 18px;
+    }
+
+    .um-fixed-page .main-heading {
+        font-size: clamp(24px,2.6vw,32px);
+    }
+
+    .um-fixed-page .um-heading-switcher {
+        width: auto;
+        max-width: 100%;
+        padding: 3px;
+        gap: 3px;
+        border-radius: 10px;
+    }
+
+        .um-fixed-page .um-heading-switcher .nav-link-custom {
+            flex: 0 0 auto;
+            min-width: 88px;
+            padding: 7px 12px;
+            font-size: 14px;
+            line-height: 1.4;
+            margin: 0;
+            border-radius: 8px;
+        }
+
+    .um-fixed-page > .row {
+        flex: 1 1 0;
+        min-height: 0;
+    }
+
+    .um-fixed-page .um-full-column {
+        display: flex;
+        min-height: 0;
+    }
+
+    .um-fixed-page .card-main {
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 0;
+        width: 100%;
+        min-width: 0;
+        min-height: 0;
+        height: 100%;
+        padding: 24px;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+
+    .um-fixed-page .content-header {
+        flex: 0 0 auto;
+        margin-bottom: 16px;
+    }
+
+    .um-fixed-page .action-bar {
+        flex: 0 0 auto;
+        min-height: 40px;
+        margin-bottom: 16px;
+    }
+
+    .um-fixed-page .left-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+    }
+
+        .um-fixed-page .left-actions > input {
+            width: auto;
+            min-height: 40px;
+            padding: 8px 16px;
+        }
+
+    .um-fixed-page .um-search {
+        position: relative;
+        width: min(320px,100%);
+    }
+
+        .um-fixed-page .um-search svg {
+            position: absolute;
+            left: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 18px;
+            height: 18px;
+            color: #64748b;
+            pointer-events: none;
+        }
+
+        .um-fixed-page .um-search input {
+            width: 100%;
+            padding-left: 40px;
+            min-height: 42px;
+        }
+
+    .um-fixed-page .um-table-scroll {
+        flex: 1 1 0;
+        min-height: 0;
+        width: 100%;
+        overflow: auto;
+        scrollbar-gutter: stable;
+        overscroll-behavior: contain;
+    }
+
+    .um-fixed-page table.custom-grid {
+        width: 100%;
+        min-width: 1080px;
+        table-layout: fixed;
+        margin: 0;
+        overflow: visible;
+    }
+
+        .um-fixed-page table.custom-grid th {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            background: #e3f2fd;
+        }
+
+        .um-fixed-page table.custom-grid td {
+            overflow-wrap: anywhere;
+        }
+
+            .um-fixed-page table.custom-grid td:nth-child(6) {
+                white-space: nowrap;
+            }
+
+        .um-fixed-page table.custom-grid th:first-child {
+            width: 70px;
+        }
+
+        .um-fixed-page table.custom-grid th:nth-child(5) {
+            width: 23%;
+        }
+
+    .um-fixed-page .um-table-scroll:focus-visible {
+        outline: 2px solid #1976d2;
+        outline-offset: -2px;
+    }
+
+@media(max-width:600px) {
+    .um-fixed-page .card-main {
+        padding: 14px;
+    }
+
+    .um-fixed-page .um-heading-row {
+        margin-bottom: 12px;
+    }
+
+    .um-fixed-page .content-header {
+        gap: 10px;
+    }
+
+    .um-fixed-page .um-search {
+        width: 100%;
+    }
+
+    .um-fixed-page .left-actions {
+        gap: 6px;
+    }
+
+        .um-fixed-page .left-actions > input {
+            padding: 7px 10px;
+        }
+}
+/* Keep controls reachable on exceptionally short screens. */
+@media(max-height:460px) {
+    .um-fixed-page .card-main {
+        overflow: auto;
+    }
+
+    .um-fixed-page .um-table-scroll {
+        flex-basis: 140px;
+        flex-shrink: 0;
+    }
+}

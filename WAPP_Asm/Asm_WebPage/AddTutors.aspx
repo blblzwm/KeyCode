@@ -2,18 +2,11 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="HeadContent" runat="server">
     <title>Add Tutors</title>
     <link href="../Asm_StyleSheet/UserManagementStyle.css" rel="stylesheet" />
-    <link href="../Asm_StyleSheet/AddTutorsStyle.css" rel="stylesheet" />
+    <link href="../Asm_StyleSheet/AddTutorsStyle.css?v=wide-form-2" rel="stylesheet" />
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
     
-    <div class="container">
-        
-        <!-- Back Link -->
-        <asp:Button ID="btnBack" 
-            runat="server" 
-            CssClass="btn-back"
-            OnClick = "btnBack_Click"
-            Text= "« Back to User Management" />
+    <div class="container add-tutor-page">
 
         <h1 class="main-heading">Add New Tutor</h1>
 
@@ -62,7 +55,7 @@
                 </asp:CustomValidator>
             </div>
 
-            <div class="form-group">
+            <div class="form-group tutor-field-wide">
                 <label for="txtPassword" class="form-label">Password</label>
                 <asp:TextBox ID="txtPassword" runat="server"
                     TextMode="Password"
@@ -209,12 +202,11 @@
 
     <!--javascript: auto-fill password from username-->
     <script type = "text/javascript" >
-        document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", function () {
             var usernameBox = document.getElementById('<%= txtUsername.ClientID %>');
             var passwordBox = document.getElementById('<%= txtPassword.ClientID %>');
 
-            usernameBox.addEventListener("input", function()
-            {
+            usernameBox.addEventListener("input", function () {
                 passwordBox.value = usernameBox.value.trim().toLowerCase();
             });
         });

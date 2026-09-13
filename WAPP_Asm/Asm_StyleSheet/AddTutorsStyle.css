@@ -1,5 +1,4 @@
-﻿
-.btn-back {
+﻿.btn-back {
     background-color: transparent;
     color: var(--primary-dark-blue);
     border: 2px solid var(--primary-dark-blue);
@@ -225,5 +224,88 @@
     .btn-save,
     .btn-cancel {
         width: 100%;
+    }
+}
+
+/* Add Tutor: wide, two-column form, retaining existing field order. */
+.add-tutor-page.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0;
+}
+
+.add-tutor-page .main-heading {
+    margin: 0 0 28px;
+}
+
+.add-tutor-page .card-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px 28px;
+    width: 100%;
+    max-width: none;
+    padding: clamp(20px, 3vw, 36px);
+    box-sizing: border-box;
+    align-items: start;
+}
+
+    .add-tutor-page .card-form > .form-section-title,
+    .add-tutor-page .card-form > .tutor-field-wide,
+    .add-tutor-page .card-form > .summary-divider,
+    .add-tutor-page .card-form > .btn-group-actions {
+        grid-column: 1 / -1;
+    }
+
+    .add-tutor-page .card-form > .form-section-title {
+        margin: 12px 0 0;
+        padding-bottom: 12px;
+    }
+
+        .add-tutor-page .card-form > .form-section-title:first-child {
+            margin-top: 0;
+        }
+
+        .add-tutor-page .card-form > .form-section-title.mt-4 {
+            margin-top: 12px !important;
+        }
+
+.add-tutor-page .form-group,
+.add-tutor-page .form-group-tutorId {
+    min-width: 0;
+    width: 100%;
+    margin-bottom: 0;
+}
+
+.add-tutor-page .form-control,
+.add-tutor-page .form-select {
+    max-width: 100%;
+    min-width: 0;
+    min-height: 46px;
+}
+
+.add-tutor-page .validation-error {
+    overflow-wrap: anywhere;
+}
+
+.add-tutor-page .summary-divider {
+    margin-top: 0;
+}
+
+.add-tutor-page .btn-group-actions {
+    margin-top: 0;
+    padding-top: 4px;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 760px) {
+    .add-tutor-page .card-form {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 18px;
+        padding: 20px;
+    }
+
+    .add-tutor-page .main-heading {
+        margin-left: 0;
     }
 }
