@@ -198,7 +198,7 @@ namespace WAPP_Asm.Asm_WebPage
             {
                 btnSaveAll.Visible = false;
             }
-            
+
             if (Role == "tutor")
             {
                 // Check if this tutor actually owns questions here
@@ -415,7 +415,7 @@ namespace WAPP_Asm.Asm_WebPage
         {
             using (SqlConnection con = new SqlConnection(Cs))
             {
-                string sql = "SELECT score FROM AssessmentResults WHERE userID = @uid AND chapterID = @cid";
+                string sql = "SELECT MAX(score) FROM AssessmentResults WHERE userID = @uid AND chapterID = @cid";
                 SqlCommand cmd = new SqlCommand(sql, con);
                 cmd.Parameters.AddWithValue("@uid", uid);
                 cmd.Parameters.AddWithValue("@cid", cid);
@@ -433,7 +433,7 @@ namespace WAPP_Asm.Asm_WebPage
                 litReviewStatus.Text = $@"
             <div class='pill' style='width:100%; justify-content:center; margin-bottom:20px; height:auto; padding:20px; display:block; text-align:center; background:#eff6ff; border-radius:12px;'>
                 <div class='pm-name' style='color:#1d4ed8; font-weight:bold;'>{cid} Completed</div>
-                <div class='pm-role' style='font-size:18px;'>Your Result: {score} / 20</div>
+                <div class='pm-role' style='font-size:18px;'>Best recorded score: {score}</div>
                 <p style='margin-top:10px; font-size:13px; color:#64748b;'>You have already submitted this chapter.</p>
             </div>";
             }

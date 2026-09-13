@@ -1,7 +1,7 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="selfassessment.aspx.cs" Inherits="WAPP_Asm.Asm_WebPage.SelfAssessment" MasterPageFile="~/Site.Master" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="SelfAssessment.aspx.cs" Inherits="WAPP_Asm.Asm_WebPage.SelfAssessment" MasterPageFile="~/Site.Master" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
-    <link href="../Content/SelfAssessmentStyle.css" rel="stylesheet" type="text/css" />
+    <link href="../Content/SelfAssessmentStyle.css?v=refined-2" rel="stylesheet" type="text/css" />
 
     <style>
         .aspNetDisabled, [disabled] {
@@ -15,7 +15,7 @@
         #btnBackToDash:hover { background: #08619c !important;color: #fff !important;}
     </style>
 
-    <div class="container" style="padding-top: 30px;">
+    <div class="container assessment-page" style="padding-top: 30px;">
         
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <asp:Button ID="btnBackToDash" runat="server"
@@ -31,6 +31,7 @@
             <p style="font-size: 18px; color: #64748b;"><asp:Literal ID="litSubTitle" runat="server" /></p>
         </div>
 
+        <div class="assessment-progress" role="status" aria-live="polite"><span id="assessmentCount">Your knowledge checkpoint</span><progress id="assessmentProgress" max="1" value="0" aria-label="Questions answered"></progress></div>
         <div style="margin-bottom: 25px;">
             
             <asp:PlaceHolder ID="phNormalMode" runat="server">
@@ -133,6 +134,16 @@
     </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            function updateAssessmentProgress() {
+                var groups = Array.from(document.querySelectorAll('.q-wrap')).filter(function (g) { return g.querySelector('input[type=radio]'); });
+                var done = groups.filter(function (g) { return g.querySelector('input[type=radio]:checked'); }).length;
+                document.getElementById('assessmentCount').textContent = done + ' of ' + groups.length + ' questions answered';
+                var progress = document.getElementById('assessmentProgress'); progress.max = groups.length || 1; progress.value = done;
+                if (!groups.length || !document.querySelector('.q-wrap input[type=radio]:not(:disabled)')) document.querySelector('.assessment-progress').hidden = true;
+            }
+            document.addEventListener('change', updateAssessmentProgress); updateAssessmentProgress();
+        });
         function toggleMenu() { document.getElementById("myDropdown").classList.toggle("show"); }
         window.onclick = function (e) {
             if (!e.target.matches('.dots-btn')) {
