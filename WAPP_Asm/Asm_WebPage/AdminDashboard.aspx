@@ -1,19 +1,23 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="AdminDashboard.aspx.cs" Inherits="WAPP_Asm.Asm_WebPage.AdminDashboard" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="HeadContent" runat="server">
-    <title>Admin Dashboard</title>
-    <link href="../Asm_StyleSheet/AdminStyle.css" rel="stylesheet" />
+    
+    <link href="<%= ResolveUrl("~/Asm_StyleSheet/AdminStyle.css?v=student-match-4") %>" rel="stylesheet" />
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
-    <div class="dashboard-container">
+    <div class="dashboard-container admin-overview">
 
         <h1 class="welcome-text">
             Welcome back, <asp:Literal ID="litWelcomeName" runat="server"></asp:Literal>
         </h1>
 
-        <br />
-        <p class="subtitle">Available Courses:</p>
+        <div class="admin-summary" aria-label="Active account summary">
+<div class="admin-summary-card tone-0"><span class="summary-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m2 9 10-5 10 5-10 5L2 9Z"/><path d="M6 11v6c4 3 8 3 12 0v-6M22 9v7"/></svg></span><div class="summary-copy"><span>Active Students</span><strong><asp:Literal ID="litStudentCount" runat="server" Text="—" /></strong><small>Student accounts</small></div></div>
+<div class="admin-summary-card tone-1"><span class="summary-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="13" rx="2"/><path d="M8 21h8M12 16v5M7 8h10M7 11h6"/></svg></span><div class="summary-copy"><span>Active Tutors</span><strong><asp:Literal ID="litTutorsCount" runat="server" Text="—" /></strong><small>Teaching accounts</small></div></div>
+<div class="admin-summary-card tone-2"><span class="summary-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 5a3 3 0 0 1 0 6M18 15a5 5 0 0 1 3 4v2"/></svg></span><div class="summary-copy"><span>Total Active Learners</span><strong><asp:Literal ID="litTotalCount" runat="server" Text="—" /></strong><small>Students and tutors combined</small></div></div>
+</div>
+        <h2 class="subtitle">Learning materials</h2>
 
         <!-- CHAPTERS -->
         <div class="chapter-container">
@@ -23,12 +27,12 @@
                 NavigateUrl="~/Asm_WebPage/LearningMaterial.aspx?chapter=C001">
                 <div class="chapter-img-wrap">
                     <img src="../chp1.png" alt="Python Fundamentals" class="chapter-img" />
-                    <span class="chapter-badge">Chapter 1</span>
                 </div>
                 <div class="chapter-body">
                     <div class="chapter-title">Python Fundamentals</div>
+                    <div class="chapter-meta">Chapter 1</div>
                     <p class="chapter-desc">Learn variables, data types, user input, and output. Write your first Python programs from scratch.</p>
-                    <span class="chapter-arrow">View Learning Materials →</span>
+                    <div class="chapter-pills"><span class="chapter-arrow">View Learning Materials →</span></div>
                 </div>
             </asp:HyperLink>
 
@@ -37,12 +41,12 @@
                 NavigateUrl="~/Asm_WebPage/LearningMaterial.aspx?chapter=C002">
                 <div class="chapter-img-wrap">
                     <img src="../chp2.png" alt="Decision and Loop Controls" class="chapter-img" />
-                    <span class="chapter-badge">Chapter 2</span>
                 </div>
                 <div class="chapter-body">
                     <div class="chapter-title">Decision & Loop Controls</div>
+                    <div class="chapter-meta">Chapter 2</div>
                     <p class="chapter-desc">Control program flow using conditions and loops. Make decisions and repeat actions intelligently.</p>
-                    <span class="chapter-arrow">View Learning Materials →</span>
+                    <div class="chapter-pills"><span class="chapter-arrow">View Learning Materials →</span></div>
                 </div>
             </asp:HyperLink>
 
@@ -51,127 +55,24 @@
                 NavigateUrl="~/Asm_WebPage/LearningMaterial.aspx?chapter=C003">
                 <div class="chapter-img-wrap">
                     <img src="../chp3.png" alt="Basic Data Structures" class="chapter-img" />
-                    <span class="chapter-badge">Chapter 3</span>
                 </div>
                 <div class="chapter-body">
                     <div class="chapter-title">Basic Data Structures</div>
+                    <div class="chapter-meta">Chapter 3</div>
                     <p class="chapter-desc">Store and manage data using lists, tuples, and sets. Organize multiple values with ease.</p>
-                    <span class="chapter-arrow">View Learning Materials →</span>
+                    <div class="chapter-pills"><span class="chapter-arrow">View Learning Materials →</span></div>
                 </div>
             </asp:HyperLink>
 
         </div>
 
-        <!-- MANAGEMENT GRID -->
-        <div class="management-grid">
-
-            <!-- left col (analytics) -->
-            <div class="management-section management-tall">
-                <div>
-                    <h3 class="analytics-title">Analytics</h3>
-                    <p class="analytics-desc">Monitor forum activity and view student performance insights across all chapters.</p>
-                    <div class="analytics-img-wrap">
-                        <asp:Image runat="server"
-                            ImageUrl="~/analytics2_gif.gif"
-                            AlternateText="Analytics gif."
-                            CssClass="analytics-img-large" Height="195px" Width="215px" />
-                    </div>
-                </div>
-                <asp:Button ID="btnAnalytics" runat="server"
-                    CssClass="management-btn analytics-btn"
-                    Text="View Analytics →"
-                    OnClick="btnAnalytics_Click" />
-            </div>
-
-            <!-- right col (appeals and user management) -->
-            <div class="management-right-col">
-
-                <!-- top: Appeals -->
-                <div class="management-section">
-                    <div class="management-top">
-                        <div class="management-info">
-                            <div class="management-icon">
-                                <asp:Image CssClass="management-img" runat="server"
-                                    ImageUrl="~/appeal_icon.png"
-                                    AlternateText="Reactivation Appeals icon."
-                                    Height="47px" Width="47px"/>
-                            </div>
-                            <div>
-                                <h3>Reactivation Requests</h3>
-                                <p>Review and process account reactivation appeals submitted by suspended students and tutors.</p>
-                            </div>
-                        </div>
-                        <asp:Button ID="btnReactivationRequest" runat="server"
-                            CssClass="management-btn"
-                            Text="View Appeals →"
-                            OnClick="btnReactivationRequest_Click" />
-                    </div>
-                    <div class="management-stats">
-                        <div class="stat-box">
-                            <p class="stat-label">Pending</p>
-                            <p class="stat-value">
-                                <asp:Literal ID="litPendingCount" runat="server" Text="0"></asp:Literal>
-                            </p>
-                        </div>
-                        <div class="stat-box">
-                            <p class="stat-label">Approved</p>
-                            <p class="stat-value">
-                                <asp:Literal ID="litApprovedCount" runat="server" Text="0"></asp:Literal>
-                            </p>
-                        </div>
-                        <div class="stat-box">
-                            <p class="stat-label">Total Appeals</p>
-                            <p class="stat-value">
-                                <asp:Literal ID="litTotalAppealsCount" runat="server" Text="0"></asp:Literal>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- bottom: User Management -->
-                <div class="management-section">
-                    <div class="management-top">
-                        <div class="management-info">
-                            <div class="management-icon">
-                                <asp:Image CssClass="management-img" runat="server"
-                                    ImageUrl="~/user_icon.jpg"
-                                    AlternateText="User icon."
-                                    Height="47px" Width="47px"/>
-                            </div>
-                            <div>
-                                <h3>User Management</h3>
-                                <p>Manage tutor and student accounts, update roles, and maintain access control.</p>
-                            </div>
-                        </div>
-                        <asp:Button ID="btnUserManagement" runat="server"
-                            CssClass="management-btn"
-                            Text="Manage Users →"
-                            OnClick="btnUserManagement_Click" />
-                    </div>
-                    <div class="management-stats">
-                        <div class="stat-box">
-                            <p class="stat-label">Students</p>
-                            <p class="stat-value">
-                                <asp:Literal ID="litStudentCount" runat="server" Text="--"></asp:Literal>
-                            </p>
-                        </div>
-                        <div class="stat-box">
-                            <p class="stat-label">Tutors</p>
-                            <p class="stat-value">
-                                <asp:Literal ID="litTutorsCount" runat="server" Text="--"></asp:Literal>
-                            </p>
-                        </div>
-                        <div class="stat-box">
-                            <p class="stat-label">Total Users</p>
-                            <p class="stat-value">
-                                <asp:Literal ID="litTotalCount" runat="server" Text="--"></asp:Literal>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-    </div>
+<section class="admin-appeals" aria-labelledby="appealsHeading">
+<div class="admin-appeals-heading"><div><h2 id="appealsHeading">Reactivation Requests</h2><p>Keep track of account appeals and requests awaiting review.</p></div>
+<a href="<%= ResolveUrl("~/Asm_WebPage/ReactivationRequest.aspx") %>">View appeals →</a></div>
+<div class="admin-appeal-stats">
+<div><span>Pending</span><strong><asp:Literal ID="litPendingCount" runat="server" Text="0" /></strong></div>
+<div><span>Approved</span><strong><asp:Literal ID="litApprovedCount" runat="server" Text="0" /></strong></div>
+<div><span>Total Appeals</span><strong><asp:Literal ID="litTotalAppealsCount" runat="server" Text="0" /></strong></div>
+</div></section>
+</div>
 </asp:Content>

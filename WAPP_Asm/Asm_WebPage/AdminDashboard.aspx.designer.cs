@@ -24,6 +24,33 @@ namespace WAPP_Asm.Asm_WebPage
         protected global::System.Web.UI.WebControls.Literal litWelcomeName;
 
         /// <summary>
+        /// litStudentCount control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litStudentCount;
+
+        /// <summary>
+        /// litTutorsCount control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litTutorsCount;
+
+        /// <summary>
+        /// litTotalCount control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litTotalCount;
+
+        /// <summary>
         /// lnkChapter1 control.
         /// </summary>
         /// <remarks>
@@ -51,24 +78,6 @@ namespace WAPP_Asm.Asm_WebPage
         protected global::System.Web.UI.WebControls.HyperLink lnkChapter3;
 
         /// <summary>
-        /// btnAnalytics control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnAnalytics;
-
-        /// <summary>
-        /// btnReactivationRequest control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnReactivationRequest;
-
-        /// <summary>
         /// litPendingCount control.
         /// </summary>
         /// <remarks>
@@ -94,41 +103,5 @@ namespace WAPP_Asm.Asm_WebPage
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Literal litTotalAppealsCount;
-
-        /// <summary>
-        /// btnUserManagement control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnUserManagement;
-
-        /// <summary>
-        /// litStudentCount control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Literal litStudentCount;
-
-        /// <summary>
-        /// litTutorsCount control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Literal litTutorsCount;
-
-        /// <summary>
-        /// litTotalCount control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Literal litTotalCount;
     }
 }

@@ -13,10 +13,18 @@ namespace WAPP_Asm.Asm_WebPage
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            if (string.IsNullOrWhiteSpace(Convert.ToString(Session["UserID"])))
+            {
+                Response.Redirect("~/Asm_WebPage/Login.aspx", false);
+                Context.ApplicationInstance.CompleteRequest();
+                return;
+            }
+            if (!string.Equals(Convert.ToString(Session["role"]).Trim(), "admin", StringComparison.OrdinalIgnoreCase))
+                throw new System.Web.HttpException(403, "Administrator access required.");
             if (!IsPostBack)
             {
                 if (Session["username"] != null)
-                    litWelcomeName.Text = $"{Session["username"]}!";
+                    litWelcomeName.Text = Server.HtmlEncode(Convert.ToString(Session["username"])) + "!";
                 else
                     litWelcomeName.Text = "Admin";
 
@@ -43,8 +51,8 @@ namespace WAPP_Asm.Asm_WebPage
         private void LoadAppealCounts()
         {
             string sql = @"SELECT
-                            SUM(CASE WHEN status = 'Pending'  THEN 1 ELSE 0 END) AS PendingCount,
-                            SUM(CASE WHEN status = 'Approved' THEN 1 ELSE 0 END) AS ApprovedCount,
+                            COALESCE(SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END), 0) AS PendingCount,
+                            COALESCE(SUM(CASE WHEN status = 'Approved' THEN 1 ELSE 0 END), 0) AS ApprovedCount,
                             COUNT(*) AS TotalCount
                            FROM ReactivationRequests";
 
@@ -71,9 +79,10 @@ namespace WAPP_Asm.Asm_WebPage
             }
             catch (Exception ex)
             {
-                litPendingCount.Text = ex.Message;
-                litApprovedCount.Text = ex.Message;
-                litTotalAppealsCount.Text = ex.Message;
+                System.Diagnostics.Trace.TraceError("Admin summary: {0}", ex);
+                litPendingCount.Text = "Unavailable";
+                litApprovedCount.Text = "Unavailable";
+                litTotalAppealsCount.Text = "Unavailable";
             }
             finally
             {
@@ -99,9 +108,10 @@ namespace WAPP_Asm.Asm_WebPage
             }
             catch (Exception ex)
             {
-                litStudentCount.Text = ex.Message;
-                litTutorsCount.Text = ex.Message;
-                litTotalCount.Text = ex.Message;
+                System.Diagnostics.Trace.TraceError("Admin summary: {0}", ex);
+                litStudentCount.Text = "Unavailable";
+                litTutorsCount.Text = "Unavailable";
+                litTotalCount.Text = "Unavailable";
             }
             finally
             {
