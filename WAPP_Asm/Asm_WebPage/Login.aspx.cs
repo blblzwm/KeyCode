@@ -1,251 +1,670 @@
-﻿using System;
+﻿using Isopoh.Cryptography.Argon2;
+using System;
+using System.Collections.Specialized;
 using System.Configuration;
+using System.Data;
 using System.Data.SqlClient;
-using Isopoh.Cryptography.Argon2;
 using System.Net;
+using System.Text;
 using System.Web;
 using System.Web.Script.Serialization;
-using System.Collections.Specialized;
 
 namespace WAPP_Asm.Asm_WebPage
 {
     public partial class Login : System.Web.UI.Page
     {
+        protected string RecaptchaSiteKey
+        {
+            get
+            {
+                return (
+                    ConfigurationManager.AppSettings["RecaptchaSiteKey"] ?? ""
+                ).Trim();
+            }
+        }
+
+        protected string GoogleClientId
+        {
+            get
+            {
+                return (
+                    ConfigurationManager.AppSettings["GoogleClientId"] ?? ""
+                ).Trim();
+            }
+        }
+
+        protected string GoogleAuthUri
+        {
+            get
+            {
+                return (
+                    ConfigurationManager
+                        .AppSettings["GoogleRedirectUri"] ?? ""
+                ).Trim();
+            }
+        }
+
         protected void Page_Load(object sender, EventArgs e)
         {
-            Response.Cache.SetCacheability(HttpCacheability.NoCache);
-            Response.Cache.SetNoStore();
-            Response.Cache.SetExpires(DateTime.UtcNow.AddMinutes(-1));
-            Response.Cache.SetRevalidation(HttpCacheRevalidation.AllCaches);
+            DisableBrowserCaching();
 
-            if (!IsPostBack)
+            if (IsPostBack)
+                return;
+
+            ShowGoogleAuthenticationError();
+
+            if (string.IsNullOrWhiteSpace(GoogleClientId))
             {
-                if (Session["UserID"] != null && Session["role"] != null)
-                {
-                    string sessionStatus = Session["status"]?.ToString() ?? "";
-                    if (sessionStatus.Equals("Suspended", StringComparison.OrdinalIgnoreCase))
-                        return;
-
-                    string role = Session["role"].ToString().Trim().ToLowerInvariant();
-
-                    string target = null;
-                    switch (role)
-                    {
-                        case "student":
-                            target = ResolveUrl("~/Asm_WebPage/StudentDashboard.aspx");
-                            break;
-                        case "tutor":
-                            target = ResolveUrl("~/Asm_WebPage/TutorDashboard.aspx");
-                            break;
-                        case "admin":
-                            target = ResolveUrl("~/Asm_WebPage/AdminDashboard.aspx");
-                            break;
-                    }
-
-                    if (!string.IsNullOrEmpty(target))
-                    {
-                        Response.Redirect(target, false);
-                        Context.ApplicationInstance.CompleteRequest();
-                        return;
-                    }
-                }
+                ShowError(
+                    "ⓘ Google Sign-In is not configured. " +
+                    "Please contact the administrator."
+                );
             }
+
+            RedirectExistingAuthenticatedUser();
         }
 
         protected void BtnLogin_Click(object sender, EventArgs e)
         {
+
             lblMessage.Visible = false;
-            lblMessage.Text = "";
+            btnReactivate.Visible = false;
 
-            string captchaResponse = Request.Form["g-recaptcha-response"];
-            if (string.IsNullOrEmpty(captchaResponse))
-            {
-                lblMessage.Text = "ⓘ Please verify that you are not a robot.";
-                lblMessage.Visible = true;
+            Page.Validate("LocalLogin");
+
+            if (!Page.IsValid)
                 return;
-            }
 
-            string secretKey = ConfigurationManager.AppSettings["RecaptchaSecretKey"];
-            try
-            {
-                using (WebClient client = new WebClient())
-                {
-                    NameValueCollection values = new NameValueCollection();
-                    values["secret"] = secretKey;
-                    values["response"] = captchaResponse;
+            string captchaResponse =
+                Request.Form["g-recaptcha-response"];
 
-                    byte[] responseBytes = client.UploadValues(
-                        "https://www.google.com/recaptcha/api/siteverify", values);
-
-                    string resultJson = System.Text.Encoding.UTF8.GetString(responseBytes);
-
-                    JavaScriptSerializer js = new JavaScriptSerializer();
-                    dynamic captchaResult = js.Deserialize<dynamic>(resultJson);
-
-                    if (captchaResult == null || !captchaResult.ContainsKey("success") || !(bool)captchaResult["success"])
-                    {
-                        lblMessage.Text = "ⓘ Captcha verification failed.";
-                        lblMessage.Visible = true;
-                        return;
-                    }
-                }
-            }
-            catch
-            {
-                lblMessage.Text = "ⓘ Captcha verification failed. Please try again.";
-                lblMessage.Visible = true;
+            if (!VerifyRecaptcha())
                 return;
-            }
+            HideMessages();
 
             string username = (txtUsername.Text ?? "").Trim();
-            string password = (txtPassword.Text ?? "").Trim();
 
-            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+            // Do not trim passwords because spaces may be intentional.
+            string password = txtPassword.Text ?? "";
+
+            if (string.IsNullOrWhiteSpace(username) ||
+                string.IsNullOrEmpty(password))
             {
-                lblMessage.Text = "ⓘ You must fill in both username and password.";
-                lblMessage.Visible = true;
+                ShowError(
+                    "ⓘ You must fill in both username and password."
+                );
                 return;
             }
 
-            string cs = ConfigurationManager.ConnectionStrings["KeyCodeDB"].ConnectionString;
+            AuthenticateLocalUser(username, password);
+        }
 
-            using (SqlConnection con = new SqlConnection(cs))
-            using (SqlCommand cmd = new SqlCommand(
-                "SELECT userID, role, pwd_hash, status, upload_profile FROM dbo.Users WHERE username=@u", con))
+        private void AuthenticateLocalUser(
+            string username,
+            string password)
+        {
+            string connectionString =
+                ConfigurationManager
+                    .ConnectionStrings["KeyCodeDB"]
+                    .ConnectionString;
+
+            try
             {
-                cmd.Parameters.Add("@u", System.Data.SqlDbType.NVarChar, 50).Value = username;
-
-                con.Open();
-
-                using (SqlDataReader dr = cmd.ExecuteReader())
+                using (SqlConnection connection =
+                    new SqlConnection(connectionString))
+                using (SqlCommand command = new SqlCommand(@"
+                    SELECT TOP (1)
+                        userID,
+                        username,
+                        role,
+                        pwd_hash,
+                        status,
+                        upload_profile
+                    FROM dbo.Users
+                    WHERE username = @username;", connection))
                 {
-                    if (!dr.Read())
+                    command.Parameters.Add(
+                        "@username",
+                        SqlDbType.NVarChar,
+                        50
+                    ).Value = username;
+
+                    connection.Open();
+
+                    string userId;
+                    string storedUsername;
+                    string role;
+                    string passwordHash;
+                    string status;
+                    string profile;
+
+                    using (SqlDataReader reader =
+                        command.ExecuteReader())
                     {
-                        lblMessage.Text = "ⓘ Invalid username or password!";
-                        lblMessage.Visible = true;
+                        if (!reader.Read())
+                        {
+                            ShowInvalidCredentials();
+                            return;
+                        }
+
+                        userId =
+                            reader["userID"].ToString().Trim();
+
+                        storedUsername =
+                            reader["username"].ToString().Trim();
+
+                        role =
+                            reader["role"].ToString()
+                                .Trim()
+                                .ToLowerInvariant();
+
+                        passwordHash =
+                            reader["pwd_hash"].ToString();
+
+                        status =
+                            reader["status"].ToString().Trim();
+
+                        profile =
+                            reader["upload_profile"] == DBNull.Value
+                                ? ""
+                                : reader["upload_profile"].ToString();
+                    }
+
+                    if (!VerifyPassword(passwordHash, password))
+                    {
+                        ShowInvalidCredentials();
                         return;
                     }
 
-                    string status = (dr["status"] ?? "").ToString().Trim();
-                    string role = (dr["role"] ?? "").ToString().Trim().ToLowerInvariant();
-                    string userId = (dr["userID"] ?? "").ToString().Trim();
-                    string storedHash = (dr["pwd_hash"] ?? "").ToString();
-
-                    if (status.Equals("Suspended", StringComparison.OrdinalIgnoreCase))
+                    if (status.Equals(
+                        "Deleted",
+                        StringComparison.OrdinalIgnoreCase))
                     {
-                        Session["UserID"] = userId;
-                        Session["username"] = username;
-                        Session["role"] = role;
-                        Session["status"] = "Suspended";
-                        Session["upload_profile"] = dr["upload_profile"]?.ToString() ?? "";
+                        ShowInvalidCredentials();
+                        return;
+                    }
 
-                        lblMessage.Text = "ⓘ Your account has been suspended.";
-                        lblMessage.Visible = true;
+                    if (role.Equals(
+                        "student",
+                        StringComparison.OrdinalIgnoreCase))
+                    {
+                        ShowError(
+                            "ⓘ Students must use the " +
+                            "Sign in with Google button."
+                        );
+                        return;
+                    }
+
+                    /*
+                     * Do not permit unknown database roles.
+                     */
+                    if (!role.Equals(
+                            "tutor",
+                            StringComparison.OrdinalIgnoreCase) &&
+                        !role.Equals(
+                            "admin",
+                            StringComparison.OrdinalIgnoreCase))
+                    {
+                        ShowError(
+                            "ⓘ This account is not allowed to use " +
+                            "username and password login."
+                        );
+                        return;
+                    }
+
+                    if (status.Equals(
+                        "Suspended",
+                        StringComparison.OrdinalIgnoreCase))
+                    {
+                        SetUserSession(
+                            userId,
+                            storedUsername,
+                            role,
+                            status,
+                            profile
+                        );
+
+                        ShowError(
+                            "ⓘ Your account has been suspended."
+                        );
+
                         btnReactivate.Visible = true;
                         return;
                     }
 
-                    if (status.Equals("Deleted", StringComparison.OrdinalIgnoreCase))
+                    if (!status.Equals(
+                        "Active",
+                        StringComparison.OrdinalIgnoreCase))
                     {
-                        lblMessage.Text = "ⓘ Invalid username or password!";
-                        lblMessage.Visible = true;
+                        ShowError(
+                            "ⓘ This account is currently unavailable."
+                        );
                         return;
                     }
 
-                    bool ok = false;
-                    try
-                    {
-                        if (!string.IsNullOrWhiteSpace(storedHash) &&
-                            storedHash.StartsWith("$argon2", StringComparison.OrdinalIgnoreCase))
-                        {
-                            ok = Argon2.Verify(storedHash, password);
-                        }
-                        else
-                        {
-                            ok = string.Equals(storedHash, password, StringComparison.Ordinal);
-                        }
-                    }
-                    catch
-                    {
-                        ok = false;
-                    }
 
-                    if (!ok)
+                    if (role.Equals(
+                            "tutor",
+                            StringComparison.OrdinalIgnoreCase) &&
+                        IsTutorTemporaryPassword(
+                            passwordHash,
+                            storedUsername))
                     {
-                        lblMessage.Text = "ⓘ Invalid username or password!";
-                        lblMessage.Visible = true;
+                        SetUserSession(
+                            userId,
+                            storedUsername,
+                            role,
+                            status,
+                            profile
+                        );
+
+                        Session["ForcePasswordChange"] = true;
+
+                        Response.Redirect(
+                            ResolveUrl(
+                                "~/Asm_WebPage/ResetPassword.aspx"
+                            ),
+                            false
+                        );
+
+                        Context.ApplicationInstance.CompleteRequest();
                         return;
                     }
 
-                    // Detect tutor first login (default password = username lowercase)
-                    if (role == "tutor")
-                    {
-                        try
-                        {
-                            if (Argon2.Verify(storedHash, username.ToLower()))
-                            {
-                                // First login — force password + security Q&A setup
-                                Session["ForcePasswordChange"] = true;
-                                Session["UserID"] = userId;
-                                Session["username"] = username;
-                                Session["role"] = "tutor";
-                                Session["status"] = "Active";
-                                Session["upload_profile"] = dr["upload_profile"]?.ToString() ?? "";
+                    SetUserSession(
+                        userId,
+                        storedUsername,
+                        role,
+                        status,
+                        profile
+                    );
 
-                                Response.Redirect("~/Asm_WebPage/ResetPassword.aspx", false);
-                                Context.ApplicationInstance.CompleteRequest();
-                                return;
-                            }
-                        }
-                        catch { }
+                    RedirectToDashboard(role);
+                }
+            }
+            catch (SqlException exception)
+            {
+                System.Diagnostics.Debug.WriteLine(
+                    "Local login database error: " +
+                    exception.Message
+                );
+
+                ShowError(
+                    "ⓘ Sign-in is temporarily unavailable. " +
+                    "Please try again later."
+                );
+            }
+            catch (Exception exception)
+            {
+                System.Diagnostics.Debug.WriteLine(
+                    "Local login error: " +
+                    exception.Message
+                );
+
+                ShowError(
+                    "ⓘ Sign-in could not be completed. " +
+                    "Please try again."
+                );
+            }
+        }
+
+        private bool VerifyPassword(
+            string storedHash,
+            string enteredPassword)
+        {
+            if (string.IsNullOrWhiteSpace(storedHash) ||
+                string.IsNullOrEmpty(enteredPassword))
+            {
+                return false;
+            }
+
+            /*
+             * Only Argon2 password hashes are accepted.
+             * Plain-text password comparison is intentionally excluded.
+             */
+            if (!storedHash.StartsWith(
+                "$argon2",
+                StringComparison.OrdinalIgnoreCase))
+            {
+                System.Diagnostics.Debug.WriteLine(
+                    "Rejected a non-Argon2 password value."
+                );
+
+                return false;
+            }
+
+            try
+            {
+                return Argon2.Verify(
+                    storedHash,
+                    enteredPassword
+                );
+            }
+            catch (Exception exception)
+            {
+                System.Diagnostics.Debug.WriteLine(
+                    "Password verification error: " +
+                    exception.Message
+                );
+
+                return false;
+            }
+        }
+
+        private bool IsTutorTemporaryPassword(
+            string storedHash,
+            string username)
+        {
+            if (string.IsNullOrWhiteSpace(storedHash) ||
+                string.IsNullOrWhiteSpace(username))
+            {
+                return false;
+            }
+
+            try
+            {
+                return Argon2.Verify(
+                    storedHash,
+                    username.ToLowerInvariant()
+                );
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private bool VerifyRecaptcha()
+        {
+            string captchaResponse =
+                Request.Form["g-recaptcha-response"];
+
+            if (string.IsNullOrWhiteSpace(captchaResponse))
+            {
+                ShowError(
+                    "ⓘ Please verify that you are not a robot."
+                );
+
+                return false;
+            }
+
+            string secretKey = (
+                ConfigurationManager
+                    .AppSettings["RecaptchaSecretKey"] ?? ""
+            ).Trim();
+
+            if (string.IsNullOrWhiteSpace(secretKey))
+            {
+                ShowError(
+                    "ⓘ reCAPTCHA is not configured. " +
+                    "Please contact the administrator."
+                );
+
+                return false;
+            }
+
+            try
+            {
+                using (WebClient client = new WebClient())
+                {
+                    NameValueCollection values =
+                        new NameValueCollection();
+
+                    values["secret"] = secretKey;
+                    values["response"] = captchaResponse;
+
+                    if (!string.IsNullOrWhiteSpace(
+                        Request.UserHostAddress))
+                    {
+                        values["remoteip"] =
+                            Request.UserHostAddress;
                     }
 
-                    Session["UserID"] = userId;
-                    Session["username"] = username;
-                    Session["role"] = role;
-                    Session["status"] = "Active";
-                    Session["upload_profile"] = dr["upload_profile"]?.ToString() ?? "";
+                    byte[] responseBytes =
+                        client.UploadValues(
+                            "https://www.google.com/" +
+                            "recaptcha/api/siteverify",
+                            "POST",
+                            values
+                        );
 
-                    string target;
-                    switch (role)
+                    string responseJson =
+                        Encoding.UTF8.GetString(responseBytes);
+
+                    JavaScriptSerializer serializer =
+                        new JavaScriptSerializer();
+
+                    RecaptchaResponse result =
+                        serializer.Deserialize<RecaptchaResponse>(
+                            responseJson
+                        );
+
+                    if (result == null || !result.success)
                     {
-                        case "student":
-                            target = ResolveUrl("~/Asm_WebPage/StudentDashboard.aspx");
-                            break;
-                        case "tutor":
-                            target = ResolveUrl("~/Asm_WebPage/TutorDashboard.aspx");
-                            break;
-                        case "admin":
-                            target = ResolveUrl("~/Asm_WebPage/AdminDashboard.aspx");
-                            break;
-                        default:
-                            target = ResolveUrl("~/Asm_WebPage/StudentDashboard.aspx");
-                            break;
+                        ShowError(
+                            "ⓘ Captcha verification failed."
+                        );
+
+                        return false;
                     }
 
-                    Response.Redirect(target, false);
-                    Context.ApplicationInstance.CompleteRequest();
-                    return;
+                    return true;
+                }
+            }
+            catch (Exception exception)
+            {
+                System.Diagnostics.Debug.WriteLine(
+                    "reCAPTCHA verification error: " +
+                    exception.Message
+                );
+
+                ShowError(
+                    "ⓘ Captcha verification failed. " +
+                    "Please try again."
+                );
+
+                return false;
+            }
+        }
+
+        private void ShowGoogleAuthenticationError()
+        {
+            string googleError = Request.QueryString["googleError"];
+
+            if (!string.IsNullOrWhiteSpace(googleError))
+            {
+                ShowError(googleError);
+            }
+            else
+            {
+                googleError =
+                    Session["GoogleAuthError"] as string;
+
+                if (!string.IsNullOrWhiteSpace(googleError))
+                {
+                    ShowError(googleError);
+                    Session.Remove("GoogleAuthError");
                 }
             }
         }
 
-        protected void btnReactivate_Click(object sender, EventArgs e)
+        private void RedirectExistingAuthenticatedUser()
         {
-            Response.Redirect("~/Asm_WebPage/ReactivationRequest.aspx");
+            if (Session["UserID"] == null ||
+                Session["role"] == null)
+            {
+                return;
+            }
+
+            string status =
+                Session["status"]?.ToString() ?? "";
+
+            if (status.Equals(
+                "Suspended",
+                StringComparison.OrdinalIgnoreCase))
+            {
+                ShowError(
+                    "ⓘ Your account has been suspended."
+                );
+
+                btnReactivate.Visible = true;
+                return;
+            }
+
+            if (!status.Equals(
+                "Active",
+                StringComparison.OrdinalIgnoreCase))
+            {
+                Session.Clear();
+                return;
+            }
+
+            RedirectToDashboard(
+                Session["role"].ToString()
+            );
         }
 
-
-        protected void BtnGuest_Click(object sender, EventArgs e)
+        private void SetUserSession(
+            string userId,
+            string username,
+            string role,
+            string status,
+            string profile)
         {
-            Session["UserID"] = null;
-            Session["username"] = "Visitor";
-            Session["role"] = "Guest";
+            ClearPendingGoogleProfile();
 
-            string target = ResolveUrl("~/Asm_WebPage/StudentDashboard.aspx");
-            Response.Redirect(target, false);
+            Session["UserID"] = userId;
+            Session["username"] = username;
+            Session["role"] = role;
+            Session["status"] = status;
+            Session["upload_profile"] = profile ?? "";
+        }
+
+        private void ClearPendingGoogleProfile()
+        {
+            Session.Remove("PendingGoogleSubject");
+            Session.Remove("PendingGoogleEmail");
+            Session.Remove("PendingGoogleFirstName");
+            Session.Remove("PendingGoogleLastName");
+            Session.Remove("PendingGoogleExpiresAt");
+        }
+
+        private void RedirectToDashboard(string role)
+        {
+            string destination;
+
+            switch ((role ?? "").Trim().ToLowerInvariant())
+            {
+                case "tutor":
+                    destination = ResolveUrl(
+                        "~/Asm_WebPage/TutorDashboard.aspx"
+                    );
+                    break;
+
+                case "admin":
+                    destination = ResolveUrl(
+                        "~/Asm_WebPage/AdminDashboard.aspx"
+                    );
+                    break;
+
+                case "student":
+                    destination = ResolveUrl(
+                        "~/Asm_WebPage/StudentDashboard.aspx"
+                    );
+                    break;
+
+                default:
+                    Session.Clear();
+                    ShowError(
+                        "ⓘ Your account role is not recognized."
+                    );
+                    return;
+            }
+
+            Response.Redirect(destination, false);
             Context.ApplicationInstance.CompleteRequest();
         }
 
+        private void ShowInvalidCredentials()
+        {
+            ShowError(
+                "ⓘ Invalid username or password!"
+            );
+        }
+
+        private void ShowError(string message)
+        {
+            /*
+             * lblMessage is an ASP.NET Literal, so encode the text
+             * before displaying it.
+             */
+            lblMessage.Text =
+                Server.HtmlEncode(message ?? "");
+
+            lblMessage.Visible = true;
+        }
+
+        private void HideMessages()
+        {
+            lblMessage.Text = "";
+            lblMessage.Visible = false;
+            btnReactivate.Visible = false;
+        }
+
+        protected void btnReactivate_Click(
+            object sender,
+            EventArgs e)
+        {
+            Response.Redirect(
+                ResolveUrl(
+                    "~/Asm_WebPage/ReactivationRequest.aspx"
+                ),
+                false
+            );
+
+            Context.ApplicationInstance.CompleteRequest();
+        }
+
+        protected void BtnGuest_Click(
+            object sender,
+            EventArgs e)
+        {
+            Session.Clear();
+
+            Session["username"] = "Visitor";
+            Session["role"] = "Guest";
+            Session["status"] = "Active";
+
+            Response.Redirect(
+                ResolveUrl(
+                    "~/Asm_WebPage/StudentDashboard.aspx"
+                ),
+                false
+            );
+
+            Context.ApplicationInstance.CompleteRequest();
+        }
+
+        private void DisableBrowserCaching()
+        {
+            Response.Cache.SetCacheability(
+                HttpCacheability.NoCache
+            );
+
+            Response.Cache.SetNoStore();
+
+            Response.Cache.SetExpires(
+                DateTime.UtcNow.AddMinutes(-1)
+            );
+
+            Response.Cache.SetRevalidation(
+                HttpCacheRevalidation.AllCaches
+            );
+        }
+
+        private sealed class RecaptchaResponse
+        {
+            public bool success { get; set; }
+        }
     }
 }

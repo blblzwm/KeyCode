@@ -1,96 +1,237 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="ResetPassword.aspx.cs" Inherits="WAPP_Asm.Asm_WebPage.ResetPassword" %>
+﻿<%@ Page Language="C#"
+    AutoEventWireup="true"
+    CodeBehind="ResetPassword.aspx.cs"
+    Inherits="WAPP_Asm.Asm_WebPage.ResetPassword" %>
+
 <!DOCTYPE html>
+
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
-<title>Reset Password</title>
-    <link href="<%= ResolveUrl("~/Asm_StyleSheet/Login.css") %>" rel="stylesheet" />
+    <meta charset="utf-8" />
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1" />
+
+    <title>KEYCODE - Reset Password</title>
+
+    <link href="<%= ResolveUrl("~/Asm_StyleSheet/Login.css") %>?v=5"
+          rel="stylesheet"
+          type="text/css" />
+<style>.reactivate-link { color:#08619c; font-weight:600; text-decoration:underline; }.reactivate-link:focus-visible { outline:2px solid #08619c; outline-offset:2px; }</style>
 </head>
+
 <body>
 <form id="form1" runat="server">
+
     <div class="login-wrapper">
         <div class="login-card">
 
             <header>
-                <img src="../logo.png" style="width:265px;height:82px;" alt="KEYCODE" />
+                <img class="auto-style1"
+                     src="<%= ResolveUrl("~/logo.png") %>"
+                     alt="KEYCODE" />
             </header>
 
-            <%-- Title changes based on forced vs normal reset --%>
             <h2 class="reset-title">
-                <asp:Label ID="lblTitle" runat="server" Text="Reset Password" />
+                <asp:Label
+                    ID="lblTitle"
+                    runat="server"
+                    Text="Reset Password" />
             </h2>
 
             <p class="instruction-text">
-                <asp:Label ID="lblInstruction" runat="server"
-                    Text="Enter your new password below." />
+                <asp:Label
+                    ID="lblInstruction"
+                    runat="server"
+                    Text="Enter your registered email to receive an OTP." />
             </p>
 
-            <div class="form-group">
-                <label>New Password</label>
-                <asp:TextBox ID="txtPassword" runat="server"
-                    TextMode="Password"
-                    CssClass="input-field" />
+            <!-- STEP INDICATOR -->
+            <div class="step-indicator">
+
+                <asp:Panel
+                    ID="dotStep1"
+                    runat="server"
+                    CssClass="step-dot active" />
+
+                <asp:Panel
+                    ID="dotStep2"
+                    runat="server"
+                    CssClass="step-dot" />
+
+                <asp:Panel
+                    ID="dotStep3"
+                    runat="server"
+                    CssClass="step-dot" />
+
             </div>
 
-            <div class="form-group">
-                <label>Confirm Password</label>
-                <asp:TextBox ID="txtConfirm" runat="server"
-                    TextMode="Password"
-                    CssClass="input-field" />
-            </div>
-
-            <%-- Security Q&A panel — only shown on tutor first login --%>
-            <asp:Panel ID="pnlSecuritySetup" runat="server" Visible="false">
-
-                <p class="section-label">Set Up Account Recovery</p>
-                <p class="instruction-text" style="font-size:0.85rem;">
-                    Since this is your first login, please set a security question.
-                    You will need it if you ever forget your password.
-                </p>
+            <!-- STEP 1: EMAIL -->
+            <asp:Panel
+                ID="pnlEmailStep"
+                runat="server">
 
                 <div class="form-group">
-                    <label>Security Question</label>
-                    <asp:DropDownList ID="ddlSecurityQuestion" runat="server" CssClass="input-field">
-                        <asp:ListItem Value="">Select a question</asp:ListItem>
-                        <asp:ListItem Value="What was the name of your first pet?">What was the name of your first pet?</asp:ListItem>
-                        <asp:ListItem Value="What street did you grow up on?">What street did you grow up on?</asp:ListItem>
-                        <asp:ListItem Value="What was your childhood nickname?">What was your childhood nickname?</asp:ListItem>
-                        <asp:ListItem Value="What is your mother's maiden name?">What is your mother's maiden name?</asp:ListItem>
-                        <asp:ListItem Value="What was the name of your primary school?">What was the name of your primary school?</asp:ListItem>
-                        <asp:ListItem Value="What city were you born in?">What city were you born in?</asp:ListItem>
-                    </asp:DropDownList>
+
+                    <label>Registered Email Address</label>
+
+                    <asp:TextBox
+                        ID="txtEmail"
+                        runat="server"
+                        TextMode="Email"
+                        CssClass="input-field"
+                        MaxLength="256"
+                        autocomplete="email"
+                        placeholder="Enter your registered email" />
+
                 </div>
 
-                <div class="form-group">
-                    <label>Your Answer</label>
-                    <asp:TextBox ID="txtSecurityAnswer" runat="server"
-                        CssClass="input-field"
-                        placeholder="Type your answer here" />
-                    <span class="security-hint">⚠ Remember this — you will need it to reset your password.</span>
+                <div class="button-group">
+
+                    <asp:Button
+                        ID="btnSendOtp"
+                        runat="server"
+                        Text="Get OTP"
+                        CssClass="btn btn-primary"
+                        OnClick="btnSendOtp_Click" />
+
                 </div>
 
             </asp:Panel>
 
-            <div class="button-group">
-                <asp:Button ID="btnReset" runat="server"
-                    Text="Reset Password"
-                    CssClass="btn btn-primary"
-                    OnClick="btnReset_Click" />
-            </div>
+            <!-- STEP 2: OTP -->
+            <asp:Panel
+                ID="pnlOtpStep"
+                runat="server"
+                Visible="false">
 
-            <asp:Label ID="lblStatus" runat="server"
+                <div class="form-group">
+
+                    <label>Verification Code</label>
+
+                    <asp:TextBox
+                        ID="txtOtp"
+                        runat="server"
+                        CssClass="input-field"
+                        MaxLength="6"
+                        inputmode="numeric"
+                        autocomplete="one-time-code"
+                        placeholder="Enter the 6-digit OTP" />
+
+                </div>
+
+                <p class="info-note">
+                    The OTP expires in 10 minutes.
+                </p>
+
+                <p class="login-hint">
+                    Didn't receive the OTP? Please check your Junk/Spam
+                    folder.
+                </p>
+
+                <div class="button-group otp-button-group">
+
+                    <asp:Button
+                        ID="btnVerifyOtp"
+                        runat="server"
+                        Text="Verify OTP"
+                        CssClass="btn btn-primary"
+                        OnClick="btnVerifyOtp_Click" />
+
+                    <asp:Button
+                        ID="btnResendOtp"
+                        runat="server"
+                        Text="Resend OTP"
+                        CssClass="btn btn-outline"
+                        CausesValidation="false"
+                        OnClick="btnResendOtp_Click" />
+
+                </div>
+
+            </asp:Panel>
+
+            <!-- STEP 3: NEW PASSWORD -->
+            <asp:Panel
+                ID="pnlPasswordStep"
+                runat="server"
+                Visible="false">
+
+                <div class="form-group">
+
+                    <label>New Password</label>
+
+                    <asp:TextBox
+                        ID="txtPassword"
+                        runat="server"
+                        TextMode="Password"
+                        CssClass="input-field"
+                        autocomplete="new-password" />
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>Confirm Password</label>
+
+                    <asp:TextBox
+                        ID="txtConfirm"
+                        runat="server"
+                        TextMode="Password"
+                        CssClass="input-field"
+                        autocomplete="new-password" />
+
+                </div>
+
+                <div class="button-group">
+
+                    <asp:Button
+                        ID="btnReset"
+                        runat="server"
+                        Text="Reset Password"
+                        CssClass="btn btn-primary"
+                        OnClick="btnReset_Click" />
+
+                </div>
+
+            </asp:Panel>
+
+            <!-- MESSAGE -->
+            <asp:Label
+                ID="lblStatus"
+                runat="server"
                 CssClass="login-error-message"
+                HtmlEncode="false"
                 Visible="false" />
 
-            <%-- Hide "Back to Login" on forced change — tutor must complete setup --%>
-            <asp:Panel ID="pnlBackLink" runat="server" CssClass="login-footer">
-                <asp:HyperLink ID="lnkLogin" runat="server"
+            <!--
+                Hidden on purpose: this control is never rendered.
+                It only exists so it has a UniqueID that the
+                "reactivation appeal" link, embedded inline inside
+                lblStatus's error text (see IssueOtp in the
+                code-behind), can post back to.
+            -->
+            <asp:LinkButton ID="btnReactivate" runat="server"
+                Text="reactivation appeal"
+                Visible="false"
+                CausesValidation="false" OnClick="btnReactivate_Click" />
+
+            <!-- BACK TO LOGIN -->
+            <asp:Panel
+                ID="pnlBackLink"
+                runat="server"
+                CssClass="login-footer">
+
+                <asp:HyperLink
+                    ID="lnkLogin"
+                    runat="server"
                     NavigateUrl="Login.aspx">
                     Back to Login
                 </asp:HyperLink>
+
             </asp:Panel>
 
         </div>
     </div>
+
 </form>
 </body>
 </html>
