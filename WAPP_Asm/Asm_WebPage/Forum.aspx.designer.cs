@@ -15,13 +15,22 @@ namespace WAPP_Asm.Asm_WebPage
     {
 
         /// <summary>
-        /// btnBack control.
+        /// pnlAdminReports control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnBack;
+        protected global::System.Web.UI.WebControls.Panel pnlAdminReports;
+
+        /// <summary>
+        /// lblPendingReportCount control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblPendingReportCount;
 
         /// <summary>
         /// btnNewPost control.
@@ -186,6 +195,42 @@ namespace WAPP_Asm.Asm_WebPage
         protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvComment;
 
         /// <summary>
+        /// hfReplyToCommentID control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField hfReplyToCommentID;
+
+        /// <summary>
+        /// pnlReplyContext control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlReplyContext;
+
+        /// <summary>
+        /// lblReplyingTo control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblReplyingTo;
+
+        /// <summary>
+        /// btnCancelReply control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.LinkButton btnCancelReply;
+
+        /// <summary>
         /// pnlCommentBox control.
         /// </summary>
         /// <remarks>
@@ -211,6 +256,60 @@ namespace WAPP_Asm.Asm_WebPage
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Button btnPostComment;
+
+        /// <summary>
+        /// hfReportTargetType control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField hfReportTargetType;
+
+        /// <summary>
+        /// hfReportTargetID control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField hfReportTargetID;
+
+        /// <summary>
+        /// ddlReportReason control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DropDownList ddlReportReason;
+
+        /// <summary>
+        /// txtReportDetails control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtReportDetails;
+
+        /// <summary>
+        /// btnSubmitReport control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnSubmitReport;
+
+        /// <summary>
+        /// rptReports control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Repeater rptReports;
 
         /// <summary>
         /// txtPostTitle control.

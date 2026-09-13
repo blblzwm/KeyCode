@@ -3,28 +3,56 @@
     <title>Discussion Forum</title>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link href="../Asm_StyleSheet/ForumStyle.css" rel="stylesheet" />
+    <link href="../Asm_StyleSheet/ForumStyle.css?v=forum-icons-3" rel="stylesheet" />
+    <script>
+        // This page owns the Forum selection, including after full postbacks.
+        document.addEventListener("DOMContentLoaded", function () {
+            const links = document.querySelectorAll("#dashSidebar a.side-nav-item");
+            const forumPath = new URL('<%= ResolveUrl("~/Asm_WebPage/Forum.aspx") %>', location.href).pathname.toLowerCase();
+            const forumLink = Array.from(links).find(function (link) {
+                return new URL(link.href, location.href).pathname.toLowerCase() === forumPath;
+            });
+            if (!forumLink) return;
+            links.forEach(function (link) {
+                const selected = link === forumLink;
+                link.classList.toggle("active", selected);
+                if (selected) link.setAttribute("aria-current", "page");
+                else link.removeAttribute("aria-current");
+            });
+        });
+    </script>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
+    <style>
+        .forum-reply-child { margin-left:42px; border-left:3px solid #dbeafe; padding-left:12px; }
+        .forum-ai-reply { background:#f5f3ff; border-radius:10px; padding:10px; }
+        .badge-ai { background:#7c3aed; color:white; }
+        .report-content { max-width:360px; white-space:normal; word-break:break-word; }
+        .reply-context { font-size:.85rem; color:#6b7280; margin-bottom:6px; }
+    </style>
 
     <div class="container-fluid" style="max-width:1200px;">
 
-        <asp:Button ID="btnBack" runat="server"
-            OnClick ="btnBack_Click"
-            CssClass="btn-back"
-            Text = "« Back to Dashboard" />
-
-        <h1 class="main-heading">Discussion Forum</h1>
+        <div class="forum-heading"><h1 class="main-heading">Discussion Forum</h1>                    <asp:Panel ID="pnlAdminReports" runat="server" Visible="false">
+                        <button type="button" class="btn btn-outline-danger" onclick="showReportsModal()">
+                            Review reports <asp:Label ID="lblPendingReportCount" runat="server" Text="0" CssClass="forum-report-count" />
+                        </button>
+                    </asp:Panel></div>
 
         <div class="forum-main">
+<section id="announcementCarousel" class="forum-announcements" hidden aria-label="Announcements">
+<div class="announcement-controls"><h2>Announcements</h2><div><button type="button" id="announcementPrev" aria-label="Previous announcement">←</button><span id="announcementPosition"></span><button type="button" id="announcementNext" aria-label="Next announcement">→</button><button type="button" id="announcementPause">Pause</button></div></div>
+<div id="announcementSlides"></div>
+</section>
 
             <div class="feed-header">
                 <h3 class="feed-title">All Discussions</h3>
                 <div style="display:flex; gap:10px; align-items:center;">
-                    <input type="text" id="searchPost" 
+                    <div class="forum-search-field"><svg class="forum-ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><input type="text" id="searchPost" aria-label="Search discussions by title" 
                         placeholder="Search by title..."
                         oninput="filterPosts(this.value)"
-                        class="search-input" />
+                        class="search-input" /></div>
+
                     <asp:Button ID="btnNewPost" runat="server"
                         CssClass="btn-new-post"
                         Text="+ New Post"
@@ -68,7 +96,7 @@
                                     data-title='<%# EscapeForJs(Eval("title").ToString()) %>'
                                     data-content='<%# EscapeForJs(Eval("content").ToString()) %>'
                                     onclick="speakPostWithComments(this)">
-                                    🔊 Read Aloud
+                                    <svg class="forum-ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15 8a6 6 0 0 1 0 8M18 5a10 10 0 0 1 0 14"/></svg> Read Aloud
                                 </button>
 
                                 <!-- Dots Menu -->
@@ -83,6 +111,14 @@
                                                 OnCommand="PostAction_Command"
                                                 Visible="false">
                                                 Edit
+                                            </asp:LinkButton>
+                                            <asp:LinkButton ID="btnReportPost" runat="server"
+                                                CssClass="dots-item"
+                                                CommandName="ReportPost"
+                                                CommandArgument='<%# Eval("postID") %>'
+                                                OnCommand="PostAction_Command"
+                                                Visible="false">
+                                                Report
                                             </asp:LinkButton>
                                             <asp:LinkButton ID="btnDeletePost" runat="server"
                                                 CssClass="dots-item dots-item-danger"
@@ -99,19 +135,47 @@
                             </div>
 
                             <div class="post-content">
-                                <div class="post-title"><%# Eval("title") %></div>
-                                <div class="post-body"><%# Eval("content") %></div>
+                                <div class="post-title"><%# FormatForumText(Eval("title")) %></div>
+                                <div class="post-body"><%# FormatForumText(Eval("content")) %></div>
                             </div>
 
-                            <div class="post-footer">
-                                <div class="reply-count">
-                                    <asp:Label ID="lblCommentCount" runat="server"></asp:Label>
-                                </div>
+                            <div class="forum-comment-total">
+                                <asp:Label ID="lblCommentCount" runat="server" />
+                            </div>
+
+                            <!-- Like and comment actions -->
+                            <div class="post-footer forum-post-actions">
+                                <asp:LinkButton ID="btnLikePost" runat="server"
+                                    CommandName="LikePost"
+                                    CommandArgument='<%# Eval("postID") %>'
+                                    OnCommand="Like_Command"
+                                    CausesValidation="false"
+                                    CssClass="forum-like" />
+
                                 <asp:LinkButton ID="btnViewComments" runat="server"
-                                    CssClass="btn-reply"
+                                    CssClass="forum-comment-action"
                                     CommandArgument='<%# Eval("postID") %>'
                                     OnClick="btnViewComments_Click"
-                                    Text="View Comments">
+                                    CausesValidation="false"
+                                    ToolTip="View comments"
+                                    aria-label="View comments">
+
+                                    <svg viewBox="0 0 24 24"
+                                         fill="none"
+                                         stroke="currentColor"
+                                         stroke-width="1.8"
+                                         stroke-linecap="round"
+                                         stroke-linejoin="round"
+                                         aria-hidden="true"
+                                         focusable="false">
+                                        <path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8
+                                                 8.5 8.5 0 0 1-7.6 4.7
+                                                 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7
+                                                 a8.4 8.4 0 0 1-.9-3.8
+                                                 8.5 8.5 0 0 1 4.7-7.6
+                                                 8.4 8.4 0 0 1 3.8-.9h.5
+                                                 a8.5 8.5 0 0 1 8 8v.5z" />
+                                    </svg>
                                 </asp:LinkButton>
                             </div>
 
@@ -138,13 +202,13 @@
                         <asp:Label ID="lblThreadTitle" runat="server"></asp:Label>
                     </h5>
                     <div class="thread-modal-header-actions">
-                        <asp:Button ID="btnSummarise" runat="server"
-                            Text="✨ Summarise"
+                        <span class="forum-summary-control"><asp:Button ID="btnSummarise" runat="server"
+                            Text="✨Summarise"
                             CssClass="btn-summarise"
                             OnClick="btnSummarise_Click"
-                            CausesValidation="false" />
+                            CausesValidation="false" /></span>
                         <button type="button" id="btnModalTts" class="btn-tts" onclick="speakModalThread()">
-                            🔊 Read Aloud
+                            <svg class="forum-ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15 8a6 6 0 0 1 0 8M18 5a10 10 0 0 1 0 14"/></svg> Read Aloud
                         </button>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
@@ -185,7 +249,7 @@
 
                     <asp:Repeater ID="rptComments" runat="server" OnItemDataBound="rptComments_ItemDataBound">
                         <ItemTemplate>
-                            <div class="reply-item">
+                            <div class='reply-item <%# Convert.ToBoolean(Eval("is_ai")) ? "forum-ai-reply" : "" %> <%# string.IsNullOrEmpty(Eval("parentCommentID").ToString()) ? "" : "forum-reply-child" %>'>
 
                                 <%# GetAvatarHtml(Eval("fname"), Eval("lname"), Eval("role"), Eval("upload_profile"), "32px", "0.8rem") %>
 
@@ -215,6 +279,13 @@
                                                         Visible="false">
                                                         Edit
                                                     </asp:LinkButton>
+                                                    
+                                                    <asp:LinkButton ID="btnReportComment" runat="server"
+                                                        CssClass="dots-item"
+                                                        CommandName="ReportComment"
+                                                        CommandArgument='<%# Eval("commentID") %>'
+                                                        OnCommand="CommentAction_Command"
+                                                        Visible="false">Report</asp:LinkButton>
                                                     <asp:LinkButton ID="btnDeleteComment" runat="server"
                                                         CssClass="dots-item dots-item-danger"
                                                         CommandName="DeleteComment"
@@ -228,7 +299,15 @@
                                             </asp:Panel>
                                         </div>
                                     </div>
-                                    <div class="reply-bubble"><%# Eval("content") %></div>
+                                    <div class="reply-context" style='<%# string.IsNullOrEmpty(Eval("parent_username").ToString()) ? "display:none" : "" %>'>
+                                        Replying to <%# Server.HtmlEncode(Eval("parent_username").ToString()) %>
+                                    </div>
+                                    <div class="reply-bubble"><%# FormatForumText(Eval("content")) %></div><asp:LinkButton ID="btnLikeComment" runat="server" CommandName="LikeComment" CommandArgument='<%# Eval("commentID") %>' OnCommand="Like_Command" CausesValidation="false" CssClass="forum-like" /><asp:LinkButton ID="btnReplyComment" runat="server"
+                                                        CssClass="forum-reply-action" CausesValidation="false"
+                                                        CommandName="ReplyComment"
+                                                        CommandArgument='<%# Eval("commentID") %>'
+                                                        OnCommand="CommentAction_Command"
+                                                        Visible="false">Reply</asp:LinkButton>
                                 </div>
                             </div>
                         </ItemTemplate>
@@ -254,20 +333,27 @@
                         Comment must not exceed 1000 characters.
                     </div>
 
-                    <div id="commentProfanityError" class="alert-box alert-error w-100" style="display:none; margin-bottom:8px;">
-                        ⚠️ Your comment contains inappropriate language.
+                    <div id="commentProfanityError" role="alert" aria-live="assertive" class="alert-box alert-error w-100" style="display:none; margin-bottom:8px;">
+                        Please remove inappropriate language before posting.
                     </div>
 
+                    <asp:HiddenField ID="hfReplyToCommentID" runat="server" />
+                    <asp:Panel ID="pnlReplyContext" runat="server" Visible="false" CssClass="reply-context">
+                        <asp:Label ID="lblReplyingTo" runat="server" />
+                        <asp:LinkButton ID="btnCancelReply" runat="server" Text="Cancel reply"
+                            CausesValidation="false" OnClick="btnCancelReply_Click" />
+                    </asp:Panel>
                     <asp:Panel ID="pnlCommentBox" runat="server" CssClass="input-group w-100" Visible="false">
                         <asp:TextBox ID="txtComment" runat="server"
                             CssClass="form-control comment-input"
-                            placeholder="Write a comment...">
+                            placeholder="Write a comment, or tag @AI to ask KeyCode AI...">
                         </asp:TextBox>
 
                         <asp:Button ID="btnPostComment" runat="server"
                             CssClass="btn btn-outline-publish comment-post-btn"
                             Text="Post"
                             OnClick="btnPostComment_Click"
+                            OnClientClick="if (!validateForumComment()) return false;"
                             ValidationGroup="PostComment" />
                     </asp:Panel>
 
@@ -276,6 +362,64 @@
         </div>
     </div>
 
+
+    <!-- REPORT CONTENT -->
+    <div class="modal fade" id="reportModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title">Report content</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <asp:HiddenField ID="hfReportTargetType" runat="server" />
+                <asp:HiddenField ID="hfReportTargetID" runat="server" />
+                <label class="form-label">Reason</label>
+                <asp:DropDownList ID="ddlReportReason" runat="server" CssClass="form-select mb-3">
+                    <asp:ListItem Value="Harassment">Harassment or bullying</asp:ListItem>
+                    <asp:ListItem Value="Hate">Hate or discrimination</asp:ListItem>
+                    <asp:ListItem Value="Threat">Threat or violence</asp:ListItem>
+                    <asp:ListItem Value="Spam">Spam or misleading content</asp:ListItem>
+                    <asp:ListItem Value="Other">Other</asp:ListItem>
+                </asp:DropDownList>
+                <label class="form-label">Details (optional)</label>
+                <asp:TextBox ID="txtReportDetails" runat="server" TextMode="MultiLine"
+                    Rows="3" MaxLength="500" CssClass="form-control" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                <asp:Button ID="btnSubmitReport" runat="server" Text="Submit report"
+                    CssClass="btn btn-danger" CausesValidation="false" OnClick="btnSubmitReport_Click" />
+            </div>
+        </div></div>
+    </div>
+
+    <!-- ADMIN REPORT REVIEW -->
+    <div class="modal fade" id="reportsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable"><div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title">Pending reports</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <div class="table-responsive"><table class="table table-striped align-middle">
+                    <thead><tr><th>Type</th><th>Reason</th><th>Content</th><th>Reporter</th><th>Time</th><th>Action</th></tr></thead>
+                    <tbody><asp:Repeater ID="rptReports" runat="server"><ItemTemplate><tr>
+                        <td><%# Server.HtmlEncode(Eval("target_type").ToString()) %></td>
+                        <td><strong><%# Server.HtmlEncode(Eval("reason").ToString()) %></strong><br />
+                            <%# FormatForumText(Eval("details")) %></td>
+                        <td class="report-content"><%# FormatForumText(Eval("reported_content")) %></td>
+                        <td><%# Server.HtmlEncode(Eval("reporter").ToString()) %></td>
+                        <td><%# GetRelativeTime(Eval("created_at")) %></td>
+                        <td class="text-nowrap">
+                            <asp:LinkButton ID="btnDismissReport" runat="server" Text="Dismiss"
+                                CssClass="btn btn-sm btn-outline-secondary" CommandName="DismissReport"
+                                CommandArgument='<%# Eval("reportID") %>' OnCommand="ReportAction_Command" CausesValidation="false" />
+                            <asp:LinkButton ID="btnDeleteReported" runat="server" Text="Delete content"
+                                CssClass="btn btn-sm btn-danger" CommandName="DeleteReportedContent"
+                                CommandArgument='<%# Eval("reportID") %>' OnCommand="ReportAction_Command"
+                                CausesValidation="false" OnClientClick="return confirm('Delete this reported content?');" />
+                        </td>
+                    </tr></ItemTemplate></asp:Repeater></tbody>
+                </table></div>
+            </div>
+        </div></div>
+    </div>
 
     <!-- CREATE NEW POST -->
     <div class="modal fade" id="newPostModal" tabindex="-1" aria-hidden="true">
@@ -437,7 +581,7 @@
                         </div>
 
                         <div id="editCommentProfanityError" class="alert-box alert-error" style="display:none;">
-                            ⚠️ Your comment contains inappropriate language. Please revise it before submitting.
+                            Please remove inappropriate language before posting. Please revise it before submitting.
                         </div>
                     </div>
                 </div>
@@ -456,8 +600,21 @@
     <!--javascript-->
     <script type="text/javascript">
 
+        function validateForumComment() {
+            var input = document.getElementById('<%= txtComment.ClientID %>');
+            var error = document.getElementById('commentProfanityError');
+            var blocked = /\b(shit|fuck|fucking|bullshit)\b/i.test(input.value);
+            error.style.display = blocked ? 'block' : 'none';
+            input.setAttribute('aria-invalid', blocked ? 'true' : 'false');
+            if (blocked) {
+                input.setAttribute('aria-describedby', 'commentProfanityError');
+                input.focus();
+            } else input.removeAttribute('aria-describedby');
+            return !blocked;
+        }
+
         function filterPosts(query) {
-            var cards = document.querySelectorAll('.post-card');
+            var cards = document.querySelectorAll('#postFeed .post-card');
             var noResult = document.getElementById('noSearchResults');
             var q = query.toLowerCase().trim();
             var visibleCount = 0;
@@ -549,7 +706,7 @@
             }
 
             currentBtn = btn;
-            btn.innerHTML = '⏹ Stop';
+            btn.innerHTML = '<svg class="forum-ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="6" y="6" width="12" height="12" rx="2"/></svg> Stop';
             btn.classList.add('btn-tts-speaking');
 
             function speakNext(index) {
@@ -642,7 +799,7 @@
 
         function resetBtn(btn) {
             if (!btn) return;
-            btn.innerHTML = '🔊 Read Aloud';
+            btn.innerHTML = '<svg class="forum-ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15 8a6 6 0 0 1 0 8M18 5a10 10 0 0 1 0 14"/></svg> Read Aloud';
             btn.classList.remove('btn-tts-speaking');
         }
 
@@ -658,6 +815,43 @@
             window.speechSynthesis.cancel();
         });
 
-    </script>
 
+        function showReportModal() {
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('reportModal')).show();
+        }
+        function hideReportModal() {
+            var modal = bootstrap.Modal.getInstance(document.getElementById('reportModal'));
+            if (modal) modal.hide();
+        }
+        function showReportsModal() {
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('reportsModal')).show();
+        }
+
+    </script>
+<script>
+    (function () {
+        function init() {
+            var box = document.getElementById("announcementCarousel"), slides = document.getElementById("announcementSlides");
+            if (!box || box.dataset.ready) return; box.dataset.ready = "1";
+            var cards = Array.from(document.querySelectorAll("#postFeed .announcement-post"));
+            if (!cards.length) return;
+            cards.forEach(function (card) { slides.appendChild(card); });
+            box.hidden = false;
+            var index = 0, paused = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            var prev = document.getElementById("announcementPrev"), next = document.getElementById("announcementNext"), pause = document.getElementById("announcementPause");
+            function show(n) { index = (n + cards.length) % cards.length; cards.forEach(function (card, i) { card.hidden = i !== index; }); document.getElementById("announcementPosition").textContent = (index + 1) + " / " + cards.length; }
+            function label() { pause.textContent = paused ? "Play" : "Pause"; pause.setAttribute("aria-pressed", String(paused)); }
+            prev.onclick = function () { paused = true; label(); show(index - 1); };
+            next.onclick = function () { paused = true; label(); show(index + 1); };
+            pause.onclick = function () { paused = !paused; label(); };
+            box.addEventListener("focusin", function () { paused = true; label(); });
+            var hover = false; box.addEventListener("mouseenter", function () { hover = true; }); box.addEventListener("mouseleave", function () { hover = false; });
+            [prev, next, pause].forEach(function (b) { b.hidden = cards.length < 2; });
+            label(); show(0);
+            var timer = setInterval(function () { if (!paused && !hover && !document.hidden && !document.querySelector(".modal.show")) show(index + 1); }, 7000);
+            window.addEventListener("pagehide", function () { clearInterval(timer); }, { once: true });
+        }
+        if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
+    }());
+</script>
 </asp:Content>
