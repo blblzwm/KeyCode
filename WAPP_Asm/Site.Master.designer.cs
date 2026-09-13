@@ -60,6 +60,24 @@ namespace KEYCODE
         protected global::System.Web.UI.WebControls.Panel pnlAvatar;
 
         /// <summary>
+        /// pnlGuestAvatar control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlGuestAvatar;
+
+        /// <summary>
+        /// pnlUserAvatar control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlUserAvatar;
+
+        /// <summary>
         /// imgAvatar control.
         /// </summary>
         /// <remarks>
@@ -78,13 +96,31 @@ namespace KEYCODE
         protected global::System.Web.UI.WebControls.Label lblInitial;
 
         /// <summary>
-        /// lblRole control.
+        /// lblUsernameSide control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblRole;
+        protected global::System.Web.UI.WebControls.Label lblUsernameSide;
+
+        /// <summary>
+        /// lblRoleUnderName control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblRoleUnderName;
+
+        /// <summary>
+        /// pnlRoleRow control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlRoleRow;
 
         /// <summary>
         /// pnlAlert control.
@@ -114,6 +150,24 @@ namespace KEYCODE
         protected global::System.Web.UI.WebControls.ContentPlaceHolder MainContent;
 
         /// <summary>
+        /// pnlGuestAvatarMenu control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlGuestAvatarMenu;
+
+        /// <summary>
+        /// pnlUserAvatarMenu control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlUserAvatarMenu;
+
+        /// <summary>
         /// imgAvatarMenu control.
         /// </summary>
         /// <remarks>
@@ -132,6 +186,15 @@ namespace KEYCODE
         protected global::System.Web.UI.WebControls.Label lblInitialMenu;
 
         /// <summary>
+        /// pnlRoleMenuRow control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlRoleMenuRow;
+
+        /// <summary>
         /// lblRoleMenu control.
         /// </summary>
         /// <remarks>
@@ -148,5 +211,23 @@ namespace KEYCODE
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Label lblUsernameMenu;
+
+        /// <summary>
+        /// pnlEditProfileAction control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlEditProfileAction;
+
+        /// <summary>
+        /// pnlGuestLoginAction control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlGuestLoginAction;
     }
 }
