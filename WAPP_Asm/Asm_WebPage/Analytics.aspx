@@ -4,19 +4,344 @@
 
 <asp:Content ID="Content1" ContentPlaceHolderID="HeadContent" runat="server">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="../Asm_StyleSheet/AnalyticsStyle.css" rel="stylesheet" />
+    <style id="analytics-grid-v6">
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+    --primary-dark-blue: #08619c;
+    --primary-mid-blue: #1976d2;
+    --primary-light-blue: #e3f2fd;
+    --accent-cyan: #2EA3C9;
+    --bg-dark: #0a1628;
+    --bg-card: #ffffff;
+    --text-primary: #0f172a;
+    --text-secondary: #64748b;
+    --border-color: #e2e8f0;
+}
+
+body {
+    font-family: 'Nunito', sans-serif;
+    background-color: #f0f6ff;
+    color: var(--text-primary);
+}
+
+.btn-back {
+    background-color: transparent;
+    color: var(--primary-dark-blue);
+    border: 2px solid var(--primary-dark-blue);
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.875rem;
+    font-family: 'Nunito', sans-serif;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 24px;
+    letter-spacing: 0.3px;
+    transition: all 0.2s ease;
+}
+
+    .btn-back:hover {
+        background-color: var(--primary-dark-blue);
+        color: #ffffff;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(8, 97, 156, 0.25);
+    }
+
+/* ─── TAB BAR ─── */
+.tab-bar {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 28px;
+    background: #ffffff;
+    padding: 6px;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(8, 97, 156, 0.1);
+    width: fit-content;
+    border: 1px solid var(--primary-light-blue);
+}
+
+.tab-btn {
+    padding: 10px 28px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    font-family: 'Nunito', sans-serif;
+    cursor: pointer;
+    background: transparent;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+}
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, #08619c 0%, #2EA3C9 100%);
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(8, 97, 156, 0.35);
+    }
+
+    .tab-btn:hover:not(.active) {
+        background: var(--primary-light-blue);
+        color: var(--primary-dark-blue);
+    }
+
+.tab-content {
+    display: none;
+}
+
+    .tab-content.active {
+        display: block;
+        animation: fadeInUp 0.3s ease;
+    }
+
+/* ─── GRID ─── */
+.col-md-4 {
+    position: relative;
+    width: 100%;
+    padding-right: 15px;
+    padding-left: 15px;
+}
+
+@media (min-width: 768px) {
+    .col-md-4 {
+        flex: 0 0 33.333%;
+        max-width: 33.333%;
+    }
+}
+
+/* ─── SUMMARY CARDS ─── */
+.summary-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 22px 20px;
+    text-align: center;
+    box-shadow: 0 4px 16px rgba(8, 97, 156, 0.08);
+    margin-bottom: 24px;
+    border: 1px solid var(--primary-light-blue);
+    border-top: 3px solid var(--primary-dark-blue);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+    .summary-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #08619c, #2EA3C9);
+        border-radius: 14px 14px 0 0;
+    }
+
+    .summary-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(8, 97, 156, 0.15);
+    }
+
+    .summary-card .value {
+        font-size: 2.2rem;
+        font-weight: 900;
+        font-family: 'Nunito', sans-serif;
+        color: var(--primary-dark-blue);
+        line-height: 1.2;
+    }
+
+    .summary-card .label {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-top: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+/* ─── CHARTS ─── */
+.analytics-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 4px 16px rgba(8, 97, 156, 0.07);
+    margin-bottom: 24px;
+    border: 1px solid var(--primary-light-blue);
+    transition: box-shadow 0.2s ease;
+}
+
+    .analytics-card:hover {
+        box-shadow: 0 6px 24px rgba(8, 97, 156, 0.12);
+    }
+
+.chart-title {
+    font-size: 1rem;
+    font-weight: 800;
+    margin-bottom: 16px;
+    color: var(--primary-dark-blue);
+    font-family: 'Nunito', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+    .chart-title::before {
+        content: '';
+        display: inline-block;
+        width: 4px;
+        height: 18px;
+        background: linear-gradient(180deg, #08619c, #2EA3C9);
+        border-radius: 2px;
+        flex-shrink: 0;
+    }
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.report-analytics-heading { display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; }
+.report-analytics-heading h3 { color:#173c64; font-size:23px; }
+.report-analytics-heading p { color:#64748b; }
+.report-metrics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; margin:20px 0; }
+.report-metrics>div { display:flex; flex-direction:column; gap:8px; padding:18px; background:#eef6ff; border-radius:12px; }
+.report-metrics strong { font-size:28px; color:#08619c; }
+.report-metrics>div:nth-child(2) { background:#fff5df; }
+.report-breakdowns { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:24px; }
+.report-breakdowns h4,.report-analytics>h4 { font-size:18px; }
+.report-breakdowns ul { list-style:none; padding:0; }
+.report-breakdowns li { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #e9eff7; gap:12px; }
+.report-table-scroll { overflow:auto; max-height:380px; }
+.report-table-scroll table { width:100%; min-width:820px; border-collapse:collapse; }
+.report-table-scroll th { position:sticky; top:0; background:#e3f2fd; text-align:left; }
+.report-table-scroll th,.report-table-scroll td { padding:12px; border-bottom:1px solid #e9eff7; vertical-align:top; }
+.report-table-scroll td:last-child { max-width:350px; overflow-wrap:anywhere; }
+@media(max-width:700px) { .report-metrics { grid-template-columns:1fr 1fr; }.report-breakdowns { grid-template-columns:1fr; } }
+
+.report-analytics { font-family:'Nunito',sans-serif; }
+.report-analytics .chart-title { font-family:'Nunito',sans-serif; font-size:1rem; font-weight:800; }
+.report-chart-card { min-width:0; border:1px solid #e9eff7; border-radius:14px; padding:20px; background:white; }
+.report-canvas-wrap { position:relative; height:300px; width:100%; }
+.report-chart-empty { min-height:160px; display:grid; place-items:center; color:#64748b; }
+.report-data { margin-top:16px; font-size:14px; }
+.report-data summary { cursor:pointer; color:#08619c; }
+.report-data table { width:100%; margin-top:10px; }
+.report-data td,.report-data th { padding:8px; text-align:left; border-bottom:1px solid #e9eff7; }
+.report-table-scroll { font-family:'Nunito',sans-serif; font-size:14px; }
+
+/* One Forum dashboard: metrics, activity, moderation charts, recent reports. */
+#tab-forum > .report-metrics { margin:0 0 24px; gap:24px; }
+#tab-forum > .report-metrics > div { background:white; border:1px solid var(--primary-light-blue); border-radius:14px; padding:20px; box-shadow:0 4px 16px rgba(8,97,156,.07); text-align:center; }
+#tab-forum > .report-metrics strong { font-family:'Nunito',sans-serif; font-size:2.2rem; font-weight:900; color:var(--primary-dark-blue); }
+#tab-forum > .report-metrics span { font-size:.85rem; font-weight:600; color:#64748b; }
+#tab-forum .report-analytics { background:transparent; padding:0; border:0; box-shadow:none; margin:0; }
+#tab-forum .report-analytics-heading { margin-bottom:16px; }
+#tab-forum .report-analytics-heading h3 { font-family:'Nunito',sans-serif; font-size:1.15rem; font-weight:800; color:var(--primary-dark-blue); }
+#tab-forum .report-analytics-heading p { font-size:.85rem; margin-bottom:0; }
+#tab-forum .report-breakdowns { gap:24px; margin-bottom:0; }
+#tab-forum .report-chart-card { padding:24px; }
+@media(max-width:700px) { #tab-forum > .report-metrics { gap:12px; } }
+
+/* Cohesive dashboard styling, scoped to Analytics. */
+.analytics-dashboard { max-width:1400px; padding:20px; margin:auto; }
+.analytics-dashboard .analytics-heading { display:flex; justify-content:space-between; align-items:center; gap:16px; margin:20px 0 24px; }
+.analytics-dashboard .analytics-heading h1 { font-size:32px; font-weight:800; margin:5px 0 6px; color:#182b49; }
+.analytics-dashboard .analytics-heading p { color:#718096; margin:0; font-size:14px; }
+.analytics-eyebrow,.analytics-period { font-size:11px; font-weight:800; letter-spacing:1.2px; color:#64748b; }
+.analytics-period { background:white; border:1px solid #e2e8f0; padding:9px 13px; border-radius:10px; white-space:nowrap; }
+.analytics-dashboard .tab-bar { margin-bottom:22px; }
+.analytics-dashboard .summary-card { background:white; border:1px solid #e4eaf2; border-radius:16px; padding:19px 21px; text-align:left; box-shadow:0 3px 12px #20385805; min-height:110px; margin:0; border-top:3px solid #377ddd; }
+.analytics-dashboard .summary-card .value { color:#1d3556; font-size:30px; line-height:1.2; font-weight:800; }
+.analytics-dashboard .summary-card .label { text-transform:uppercase; font-size:11px; letter-spacing:.8px; font-weight:800; color:#748197; margin-top:9px; }
+.analytics-dashboard .analytics-card { padding:22px; border-radius:16px; border:1px solid #e4eaf2; box-shadow:0 3px 12px #20385805; margin-bottom:0; min-width:0; }
+.analytics-dashboard .chart-title { color:#253c5c; font-size:15px; font-weight:800; margin-bottom:18px; }
+.analytics-dashboard .dashboard-plot { position:relative; height:270px; min-width:0; }
+.analytics-dashboard #tab-forum.active { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:20px; }
+.analytics-dashboard #tab-forum>.row,
+.analytics-dashboard #tab-forum>.row>div,
+.analytics-dashboard #tab-forum>.report-metrics { display:contents; }
+.analytics-dashboard #tab-forum>.row>div>.summary-card { grid-column:span 1; }
+.analytics-dashboard #tab-forum>.row>div>.analytics-card { grid-column:span 2; }
+.analytics-dashboard #tab-forum>.analytics-card { grid-column:1/-1; }
+.analytics-dashboard #tab-forum>.report-metrics>div { background:#fff5f6; border:1px solid #f7dbe0; border-top:3px solid #dc3545; box-shadow:0 3px 12px #20385805; border-radius:16px; text-align:left; padding:19px 21px; min-height:110px; gap:9px; }
+.analytics-dashboard #tab-forum>.report-metrics strong { color:#be2940; font-size:30px; font-weight:800; line-height:1.2; }
+.analytics-dashboard #tab-forum>.report-metrics span { text-transform:uppercase; letter-spacing:.8px; font-size:11px; color:#9c4e59; font-weight:800; }
+.analytics-dashboard #tab-forum .report-analytics { display:contents; }
+.analytics-dashboard #tab-forum .report-analytics-heading { grid-column:1/-1; margin:4px 0 -4px; }
+.analytics-dashboard #tab-forum .report-analytics-heading h3 { color:#be2940; font-size:17px; margin-bottom:5px; }
+.analytics-dashboard #tab-forum .report-analytics-heading a { color:#be2940; background:#fff0f2; border:1px solid #f4d5dc; padding:9px 13px; border-radius:10px; font-size:13px; font-weight:700; text-decoration:none; }
+.analytics-dashboard #tab-forum .report-breakdowns { display:contents; }
+.analytics-dashboard #tab-forum .report-chart-card { grid-column:span 2; border-top:3px solid #dc3545; padding:22px; }
+.analytics-dashboard #tab-forum .report-chart-card .chart-title,
+.analytics-dashboard #tab-forum .report-recent-card .chart-title { color:#ae2a3d; }
+.analytics-dashboard #tab-forum .report-chart-card .chart-title::before,
+.analytics-dashboard #tab-forum .report-recent-card .chart-title::before { background:#dc3545; }
+.analytics-dashboard .report-canvas-wrap { height:270px; }
+.analytics-dashboard #tab-forum .report-recent-card { grid-column:1/-1; }
+.analytics-dashboard .report-table-scroll th { background:#fff1f3; color:#9f2940; font-size:11px; text-transform:uppercase; letter-spacing:.6px; }
+.analytics-dashboard .report-table-scroll td { font-size:13px; }
+.analytics-dashboard #tab-performance>.row { margin-bottom:20px; row-gap:20px; }
+@media(max-width:1000px) {
+ .analytics-dashboard #tab-forum.active { grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+ .analytics-dashboard #tab-forum>.row>div>.analytics-card,.analytics-dashboard #tab-forum .report-chart-card { grid-column:1/-1; }
+}
+@media(max-width:520px) {
+ .analytics-dashboard { padding:12px; }
+ .analytics-dashboard .analytics-heading h1 { font-size:27px; }
+ .analytics-dashboard .summary-card,.analytics-dashboard #tab-forum>.report-metrics>div { padding:14px; }
+ .analytics-dashboard .dashboard-plot,.analytics-dashboard .report-canvas-wrap { height:240px; }
+}
+
+/* Revision 6: one community dashboard, no second row of KPI cards. */
+.analytics-dashboard #tab-forum.active { grid-template-columns:repeat(12,minmax(0,1fr)); gap:16px; align-items:stretch; }
+.analytics-dashboard #tab-forum>.row>div>.summary-card { grid-column:span 3; min-height:88px; padding:16px 20px; }
+.analytics-dashboard #tab-forum>.analytics-card.activity-overview { grid-column:1/9; grid-row:2; }
+.analytics-dashboard #tab-forum>.moderation-overview { grid-column:9/13; grid-row:2; background:#fff7f7; border:1px solid #f2dfe1; border-radius:16px; padding:20px; min-width:0; }
+.analytics-dashboard .moderation-overview .chart-title { color:#a33347; margin-bottom:5px; }
+.analytics-dashboard .moderation-overview .chart-title::before { background:#ce5264; }
+.moderation-caption { font-size:12px; color:#876b73; margin:0 0 14px; }
+.analytics-dashboard .moderation-overview .report-metrics { display:flex; flex-direction:column; gap:0; margin:0; }
+.analytics-dashboard .moderation-overview .report-metrics>div { display:flex; flex-direction:row-reverse; justify-content:space-between; align-items:center; background:transparent; border-radius:0; border-bottom:1px solid #efdde0; padding:9px 0; }
+.analytics-dashboard .moderation-overview .report-metrics strong { font-size:22px; line-height:1.2; color:#b33b50; }
+.analytics-dashboard .moderation-overview .report-metrics span { font-size:10px; font-weight:800; letter-spacing:.7px; color:#805964; }
+.review-link { display:flex; justify-content:space-between; margin-top:14px; color:#a33347; font-size:13px; font-weight:800; text-decoration:none; }
+.analytics-dashboard #tab-forum>.row>div>.analytics-card,
+.analytics-dashboard #tab-forum .report-chart-card { grid-column:span 3; padding:18px; border:1px solid #e4eaf2; border-radius:16px; }
+.analytics-dashboard #tab-forum .report-chart-card { border-top:3px solid #d26473; }
+.analytics-dashboard #tab-forum .chart-title { font-size:14px; }
+.analytics-dashboard #tab-forum .dashboard-plot,
+.analytics-dashboard #tab-forum .report-canvas-wrap { height:205px; }
+.analytics-dashboard #tab-forum .activity-overview .dashboard-plot { height:240px; }
+.analytics-dashboard #tab-forum .report-chart-empty { height:205px; min-height:0; margin:0; font-size:13px; background:#fcfafb; border-radius:10px; }
+.analytics-dashboard #tab-forum .report-recent-card { grid-column:1/-1; padding:20px; }
+.analytics-dashboard .report-table-scroll { max-height:250px; }
+.analytics-dashboard .report-data { font-size:12px; }
+.analytics-dashboard .summary-card .label { font-size:10px; }
+@media(max-width:1100px) {
+ .analytics-dashboard #tab-forum>.row>div>.analytics-card,.analytics-dashboard #tab-forum .report-chart-card { grid-column:span 6; }
+}
+@media(max-width:700px) {
+ .analytics-dashboard #tab-forum>.row>div>.summary-card { grid-column:span 6; }
+ .analytics-dashboard #tab-forum>.analytics-card.activity-overview,.analytics-dashboard #tab-forum>.moderation-overview { grid-column:1/-1; grid-row:auto; }
+ .analytics-dashboard #tab-forum>.row>div>.analytics-card,.analytics-dashboard #tab-forum .report-chart-card { grid-column:1/-1; }
+}
+
+</style>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
-<div class="container-fluid" style="max-width:1400px; padding:24px;">
+<div class="container-fluid analytics-dashboard">
 
-    <asp:Button ID="btnBack" runat="server"
-        OnClick="btnBack_Click"
-        CssClass="btn-back"
-        Text="« Back to Dashboard"
-        CausesValidation="false" />
-
-    <h1 style="margin:16px 0 24px; font-weight:800;">Analytics</h1>
+    <header class="analytics-heading"><div><span class="analytics-eyebrow">KEYCODE OVERVIEW</span><h1>Analytics</h1><p>Learning performance, community activity and moderation.</p></div><span class="analytics-period">ALL TIME</span></header>
 
     <!-- TAB BAR -->
     <div class="tab-bar">
@@ -47,13 +372,13 @@
             <div class="col-md-7">
                 <div class="analytics-card">
                     <div class="chart-title">Average Score per Chapter</div>
-                    <canvas id="chartAvgScore" height="120"></canvas>
+                    <div class="dashboard-plot"><canvas id="chartAvgScore"></canvas></div>
                 </div>
             </div>
             <div class="col-md-5">
                 <div class="analytics-card">
                     <div class="chart-title">Score Distribution</div>
-                    <canvas id="chartDistribution" height="120"></canvas>
+                    <div class="dashboard-plot"><canvas id="chartDistribution"></canvas></div>
                 </div>
             </div>
         </div>
@@ -62,17 +387,18 @@
             <div class="col-md-4">
                 <div class="analytics-card">
                     <div class="chart-title">Pass vs Fail</div>
-                    <canvas id="chartPassFail" height="180"></canvas>
+                    <div class="dashboard-plot"><canvas id="chartPassFail"></canvas></div>
                 </div>
             </div>
             <div class="col-md-8">
                 <div class="analytics-card">
                     <div class="chart-title">Top 5 Students by Avg Score</div>
-                    <canvas id="chartTopStudents" height="180"></canvas>
+                    <div class="dashboard-plot"><canvas id="chartTopStudents"></canvas></div>
                 </div>
             </div>
         </div>
 
+        <%= RenderChapterAttempts() %>
     </div>
 
     <!-- FORUM TAB-->
@@ -105,26 +431,28 @@
             </div>
         </div>
 
-        <div class="analytics-card">
+        <aside class="moderation-overview"><div class="chart-title">Moderation overview</div><p class="moderation-caption">All-time reports and review queue</p><%= RenderReportMetrics() %><a class="review-link" href="<%= ResolveUrl("~/Asm_WebPage/Forum.aspx?reports=1") %>">Review reports <span aria-hidden="true">→</span></a></aside>
+        <div class="analytics-card activity-overview">
             <div class="chart-title">Forum Activity Over Time</div>
-            <canvas id="chartActivity" height="80"></canvas>
+            <div class="dashboard-plot"><canvas id="chartActivity"></canvas></div>
         </div>
 
         <div class="row">
             <div class="col-md-4">
                 <div class="analytics-card">
                     <div class="chart-title">Posts by Role</div>
-                    <canvas id="chartPostsByRole" height="180"></canvas>
+                    <div class="dashboard-plot"><canvas id="chartPostsByRole"></canvas></div>
                 </div>
             </div>
             <div class="col-md-8">
                 <div class="analytics-card">
                     <div class="chart-title">Top 5 Most Active Users</div>
-                    <canvas id="chartActiveUsers" height="180"></canvas>
+                    <div class="dashboard-plot"><canvas id="chartActiveUsers"></canvas></div>
                 </div>
             </div>
         </div>
 
+        <%= RenderReportAnalytics() %>
     </div>
 
 </div>
@@ -153,6 +481,11 @@
     var postsByRole = [<asp:Literal ID="litPostsByRole" runat="server" />];
     var activeNames = [<asp:Literal ID="litActiveNames" runat="server" />];
     var activeTotals = [<asp:Literal ID="litActiveTotals" runat="server" />];
+
+    // Use the existing analytics typeface for every chart.
+    Chart.defaults.font.family = "'Nunito', sans-serif";
+    Chart.defaults.font.size = 12;
+    Chart.defaults.maintainAspectRatio = false;
 
     // performance charts
     new Chart(document.getElementById('chartAvgScore'), {
@@ -282,5 +615,22 @@
             plugins: { legend: { display: false } }
         }
     });
+</script>
+<script>
+    (function () {
+        var reportCharts = [];
+        document.querySelectorAll("canvas.report-chart").forEach(function (canvas) {
+            var labels = JSON.parse(canvas.dataset.labels), counts = JSON.parse(canvas.dataset.counts), kind = canvas.dataset.kind;
+            var colors = kind === "doughnut" ? labels.map(function (label) {
+                return { "Pending": "#dc3545", "Approved": "#10b981", "Dismissed": "#cbd5e1", "Deleted by review": "#9f1239", "Content removed": "#fda4af" }[label] || "#e85d75";
+            }) : "#dc3545";
+            var options = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: kind === "doughnut", position: "bottom" } } };
+            if (kind === "bar") { options.indexAxis = "y"; options.scales = { x: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: "#f0f0f0" } }, y: { grid: { display: false } } }; }
+            else options.cutout = "65%";
+            reportCharts.push(new Chart(canvas, { type: kind, data: { labels: labels, datasets: [{ label: "Reports", data: counts, backgroundColor: colors, borderWidth: 0, borderRadius: kind === "bar" ? 6 : 0 }] }, options: options }));
+        });
+        if (document.fonts) document.fonts.ready.then(function () { Object.values(Chart.instances).forEach(function (chart) { chart.update(); }); });
+        document.querySelectorAll(".tab-btn").forEach(function (button) { button.addEventListener("click", function () { requestAnimationFrame(function () { reportCharts.forEach(function (chart) { chart.resize(); }); }); }); });
+    }());
 </script>
 </asp:Content>
