@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/WAPP_Asm/Web.config
+/WAPP_Asm/Web.Debug.config
+/WAPP_Asm/Web.Release.config
