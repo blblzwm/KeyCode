@@ -439,3 +439,196 @@ body {
         width: 100%;
     }
 }
+
+/* Admin-only workspace; suspended-user appeal form retains its layout. */
+html.rr-viewport, html.rr-viewport body {
+    height: 100%;
+    overflow: hidden;
+}
+
+    html.rr-viewport .page {
+        min-height: 0;
+    }
+
+.rr-admin {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    width: 100%;
+}
+
+    .rr-admin .rr-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 18px;
+        flex-shrink: 0;
+    }
+
+    .rr-admin .main-heading {
+        margin: 0;
+        font-size: clamp(24px,2.6vw,32px);
+    }
+
+    .rr-admin .rr-tabs {
+        display: flex;
+        gap: 3px;
+        padding: 3px;
+        margin-left: auto;
+        border: 1px solid #dce6f1;
+        background: #edf3f9;
+        border-radius: 10px;
+    }
+
+        .rr-admin .rr-tabs .nav-link-custom {
+            width: auto;
+            min-width: 88px;
+            margin: 0;
+            padding: 7px 12px;
+            font-size: 14px;
+            line-height: 1.4;
+            text-align: center;
+            border-radius: 8px;
+        }
+
+        .rr-admin .rr-tabs .active {
+            background: #08619c;
+            color: white;
+        }
+
+    .rr-admin .rr-fill {
+        display: flex;
+        flex: 1 1 0;
+        min-height: 0;
+        min-width: 0;
+        width: 100%;
+    }
+
+    .rr-admin .card-main {
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 0;
+        width: 100%;
+        min-height: 0;
+        min-width: 0;
+        padding: 24px;
+        overflow: hidden;
+    }
+
+    .rr-admin .content-header {
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+        flex-shrink: 0;
+    }
+
+    .rr-admin .rr-search {
+        position: relative;
+        width: min(320px,100%);
+    }
+
+        .rr-admin .rr-search svg {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            left: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            pointer-events: none;
+        }
+
+        .rr-admin .rr-search input {
+            width: 100%;
+            padding-left: 40px;
+            min-height: 42px;
+        }
+
+    .rr-admin .action-bar {
+        flex-direction: row;
+        flex-wrap: wrap;
+        flex-shrink: 0;
+        gap: 10px;
+        min-height: 40px;
+        margin-bottom: 16px;
+    }
+
+        .rr-admin .action-bar input {
+            width: auto;
+            min-height: 40px;
+            padding: 8px 16px;
+        }
+
+    .rr-admin .rr-scroll {
+        flex: 1 1 0;
+        min-height: 0;
+        width: 100%;
+        overflow: auto;
+        scrollbar-gutter: stable;
+        overscroll-behavior: contain;
+    }
+
+    .rr-admin .custom-grid {
+        width: 100%;
+        min-width: 1000px;
+        table-layout: fixed;
+        margin: 0;
+        overflow: visible;
+    }
+
+        .rr-admin .custom-grid, .rr-admin .custom-grid tr, .rr-admin .custom-grid td {
+            border: 0 !important;
+        }
+
+            .rr-admin .custom-grid th {
+                position: sticky;
+                top: 0;
+                z-index: 1;
+                background: #e3f2fd;
+            }
+
+                .rr-admin .custom-grid th:nth-child(5) {
+                    width: 34%;
+                }
+
+                .rr-admin .custom-grid th:last-child {
+                    width: 90px;
+                }
+
+            .rr-admin .custom-grid td {
+                overflow-wrap: anywhere;
+            }
+
+                .rr-admin .custom-grid td:nth-child(3) {
+                    white-space: nowrap;
+                }
+
+    .rr-admin .rr-scroll:focus-visible, .rr-admin .rr-tabs a:focus-visible {
+        outline: 2px solid #1976d2;
+        outline-offset: -2px;
+    }
+
+@media(max-width:600px) {
+    .rr-admin .card-main {
+        padding: 14px;
+    }
+
+    .rr-admin .rr-search {
+        width: 100%;
+    }
+}
+
+@media(max-height:460px) {
+    .rr-admin .card-main {
+        overflow: auto;
+    }
+
+    .rr-admin .rr-scroll {
+        flex-basis: 140px;
+        flex-shrink: 0;
+    }
+}

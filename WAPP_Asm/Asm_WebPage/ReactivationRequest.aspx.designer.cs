@@ -123,6 +123,15 @@ namespace WAPP_Asm.Asm_WebPage
         protected global::System.Web.UI.WebControls.Label lblCategoryTitle;
 
         /// <summary>
+        /// txtRequestSearch control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtRequestSearch;
+
+        /// <summary>
         /// btnApprove control.
         /// </summary>
         /// <remarks>

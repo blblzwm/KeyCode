@@ -1,6 +1,6 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="ReactivationRequest.aspx.cs" Inherits="WAPP_Asm.Asm_WebPage.ReactivationRequest" EnableEventValidation="false" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="HeadContent" runat="server">
-    <link href="../Asm_StyleSheet/ReactivationRequestsStyle.css" rel="stylesheet">
+    <link href="../Asm_StyleSheet/ReactivationRequestsStyle.css?v=admin-scroll-2" rel="stylesheet">
 </asp:Content>
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
 
@@ -8,7 +8,6 @@
     <!-- PANEL 1: SUSPENDED USER -->
     <asp:Panel ID="pnlUser" runat="server" Visible="false">
         <div class="container-fluid" style="max-width:1400px;">
-            <asp:LinkButton class="btn-back" runat="server" OnClick="btnBack_Click">« Back to Login</asp:LinkButton>
 
             <div class="appeal-card">
                 <h2 class="appeal-title">Account Reactivation Appeal</h2>
@@ -60,16 +59,7 @@
 
     <!-- PANEL 2: ADMIN DASHBOARD -->
     <asp:Panel ID="pnlAdmin" runat="server" Visible="false">
-        <div class="container-fluid" style="max-width:1400px;">
-            <a href="AdminDashboard.aspx" class="btn-back">« Back to Dashboard</a>
-            <h1 class="main-heading">Reactivation Requests</h1>
-
-            <div class="row">
-                <div class="col-md-3 mb-4">
-                    <div class="card-sidebar">
-                        <div class="sidebar-title">Categories</div>
-
-                        <asp:LinkButton ID="btnStudents" runat="server"
+        <div id="requestAdminPage" class="rr-admin"><div class="rr-heading"><h1 class="main-heading">Reactivation Requests</h1><div class="rr-tabs" role="group" aria-label="User category"><asp:LinkButton ID="btnStudents" runat="server"
                             CssClass="nav-link-custom active"
                             OnClick="btnStudents_Click">
                             Students
@@ -78,17 +68,13 @@
                         <asp:LinkButton ID="btnTutors" runat="server"
                             CssClass="nav-link-custom"
                             OnClick="btnTutors_Click">
-                            Tutor
-                        </asp:LinkButton>
-                    </div>
-                </div>
-
-                <div class="col-md-9 mb-4">
+                            Tutors
+                        </asp:LinkButton></div></div><div class="rr-fill"><div class="rr-fill">
                     <div class="card-main">
                         <div class="content-header">
                             <h3 class="content-title">
                                 <asp:Label ID="lblCategoryTitle" runat="server" Text="Student" /> Reactivation Requests
-                            </h3>
+                            </h3><div class="rr-search"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><asp:TextBox ID="txtRequestSearch" runat="server" CssClass="form-control" placeholder="Search request or user ID..." aria-label="Search request or user ID" AutoPostBack="true" OnTextChanged="RequestSearch_Changed" /></div>
                         </div>
 
                         <!-- Action buttons -->
@@ -110,11 +96,11 @@
                                 OnClientClick="return confirm('Are you sure you want to reject this request?');" />
                         </div>
 
-                        <div style="overflow-x:auto;">
+                        <div class="rr-scroll" tabindex="0" role="region" aria-label="Scrollable requests table">
                             <asp:GridView ID="gvRequests" runat="server"
                                 CssClass="custom-grid"
                                 AutoGenerateColumns="false"
-                                GridLines="None"
+                                GridLines="None" BorderStyle="None" BorderWidth="0px" EmptyDataText="No requests found for this category or search."
                                 DataKeyNames="requestID"
                                 OnRowCreated="gvRequests_RowCreated"
                                 OnRowCommand="gvRequests_RowCommand"
@@ -168,4 +154,18 @@
             </div>
         </div>
     </asp:Panel>
+<script>
+(function() {
+    var root = document.getElementById("requestAdminPage");
+    if (!root) return;
+    document.documentElement.classList.add("rr-viewport");
+    function fit() {
+        var h = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+        root.style.height = Math.max(0, h - root.getBoundingClientRect().top - 16) + "px";
+    }
+    fit(); window.addEventListener("resize", fit); window.addEventListener("load", fit);
+    if (window.visualViewport) window.visualViewport.addEventListener("resize", fit);
+    if (document.fonts) document.fonts.ready.then(fit);
+}());
+</script>
 </asp:Content>
