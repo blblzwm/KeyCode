@@ -9,20 +9,16 @@ namespace WAPP_Asm.Asm_WebPage
 {
     public partial class HomePage : System.Web.UI.Page
     {
+        protected bool IsGuestForHome = true;
+
         protected void Page_Load(object sender, EventArgs e)
         {
-            
-        }
+            string roleRaw = (Session["role"] ?? "nonreg_student").ToString().Trim().ToLower();
+            string userId = (Session["UserID"] ?? "").ToString().Trim();
 
-        protected void btnGuest_Click(object sender, EventArgs e)
-        {
-            Session["UserID"] = null;
-            Session["username"] = "Visitor";
-            Session["role"] = "guest";
-            Session["upload_profile"] = "";
-
-            Response.Redirect("~/Asm_WebPage/StudentDashboard.aspx", false);
-            Context.ApplicationInstance.CompleteRequest();
+            IsGuestForHome = roleRaw == "nonreg_student"
+                              || roleRaw == "guest"
+                              || string.IsNullOrEmpty(userId);
         }
     }
 }
