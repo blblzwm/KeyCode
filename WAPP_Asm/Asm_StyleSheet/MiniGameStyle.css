@@ -1,0 +1,779 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+/* Scoped to the game. Do not add another .page or .container inside Site.Master. */
+#runnerGame {
+    --rg-blue: #2563eb;
+    --rg-ink: #192c48;
+    --rg-muted: #65758d;
+    --rg-line: #e0e7f0;
+    font-family: 'Nunito Sans','Segoe UI',sans-serif;
+    color: var(--rg-ink);
+    max-width: 1380px;
+    margin: 6px auto 28px;
+}
+
+    #runnerGame * {
+        box-sizing: border-box;
+    }
+
+    #runnerGame [hidden] {
+        display: none !important;
+    }
+
+    #runnerGame :is(button,a) {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+        #runnerGame :is(button,a):focus-visible {
+            outline: 3px solid #f5b84b;
+            outline-offset: 4px;
+        }
+
+    #runnerGame button {
+        cursor: pointer;
+        font: inherit;
+    }
+
+        #runnerGame button:disabled {
+            cursor: default;
+        }
+
+    #runnerGame .rg-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 26px;
+    }
+
+    #runnerGame .rg-eyebrow {
+        display: inline-block;
+        color: var(--rg-blue);
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: .14em;
+    }
+
+    #runnerGame .rg-title {
+        font-family: 'Space Grotesk','Segoe UI',sans-serif !important;
+        font-size: clamp(28px,3.4vw,46px);
+        line-height: 1.2;
+        font-weight: 700;
+        margin: 9px 0;
+        letter-spacing: -.045em;
+    }
+
+        #runnerGame .rg-title span {
+            color: var(--rg-blue);
+        }
+
+    #runnerGame .rg-subtitle {
+        color: var(--rg-muted);
+        font-size: 16px;
+        margin: 0;
+        line-height: 1.6;
+    }
+
+    #runnerGame .rg-best {
+        min-width: 120px;
+        text-align: right;
+    }
+
+        #runnerGame .rg-best > span {
+            display: block;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: .12em;
+            color: var(--rg-muted);
+        }
+
+        #runnerGame .rg-best strong {
+            font: 700 32px 'Space Grotesk',sans-serif;
+        }
+
+        #runnerGame .rg-best small {
+            margin-left: 6px;
+            color: var(--rg-muted);
+        }
+
+    #runnerGame .rg-layout {
+        display: grid;
+        grid-template-columns: minmax(0,1.35fr) minmax(340px,1fr);
+        gap: 24px;
+        align-items: start;
+    }
+
+    #runnerGame :is(.rg-run-card,.rg-question-card) {
+        background: #fff;
+        border: 1px solid var(--rg-line);
+        border-radius: 22px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px #203d6710;
+        min-width: 0;
+    }
+
+    #runnerGame .rg-scoreboard {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        padding: 20px 24px;
+    }
+
+    #runnerGame .rg-micro {
+        display: block;
+        font-size: 10px;
+        color: var(--rg-muted);
+        font-weight: 800;
+        letter-spacing: .12em;
+    }
+
+    #runnerGame #rgScore {
+        display: block;
+        font: 700 32px 'Space Grotesk',sans-serif;
+        line-height: 1.2;
+        font-variant-numeric: tabular-nums;
+    }
+
+    #runnerGame .rg-score-detail {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        font-size: 12px;
+        color: var(--rg-muted);
+        gap: 3px;
+    }
+
+    #runnerGame #rgGuestInfo {
+        color: #a6651a;
+    }
+
+    #runnerGame .rg-icon-button {
+        border: 1px solid var(--rg-line);
+        border-radius: 9px;
+        background: #fff;
+        font-size: 11px;
+        font-weight: 600;
+        min-height: 36px;
+        padding: 6px 10px;
+        color: var(--rg-muted);
+    }
+
+        #runnerGame .rg-icon-button[aria-pressed="true"] {
+            background: #eaf1ff;
+            color: #1c4dc1;
+            border-color: #a7bff4;
+        }
+
+    #runnerGame .rg-scene {
+        height: 340px;
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(180deg,#eef4ff,#f8fbff 78%);
+        isolation: isolate;
+    }
+
+    #runnerGame .rg-sun {
+        position: absolute;
+        width: 82px;
+        height: 82px;
+        border-radius: 50%;
+        background: #ffe8ad;
+        right: 15%;
+        top: 42px;
+    }
+
+    #runnerGame .rg-cloud {
+        position: absolute;
+        width: 90px;
+        height: 15px;
+        background: #fff;
+        border-radius: 30px;
+    }
+
+        #runnerGame .rg-cloud::before {
+            content: '';
+            position: absolute;
+            width: 42px;
+            height: 32px;
+            background: #fff;
+            border-radius: 50%;
+            left: 18px;
+            top: -18px;
+        }
+
+    #runnerGame .rg-cloud-one {
+        top: 74px;
+        left: 10%;
+    }
+
+    #runnerGame .rg-cloud-two {
+        top: 128px;
+        right: 14%;
+        width: 110px;
+        opacity: .8;
+    }
+
+    #runnerGame .rg-skyline {
+        position: absolute;
+        left: -10%;
+        width: 120%;
+        bottom: 54px;
+        height: 110px;
+        background: #dfe9f8;
+        clip-path: polygon(0 100%,0 70%,8% 70%,8% 43%,13% 43%,13% 67%,21% 67%,21% 20%,28% 20%,28% 48%,38% 48%,38% 10%,45% 10%,45% 60%,54% 60%,54% 36%,62% 36%,62% 0,68% 0,68% 58%,76% 58%,76% 30%,84% 30%,84% 50%,92% 50%,92% 20%,100% 20%,100% 100%);
+    }
+
+    #runnerGame .rg-skyline-front {
+        background: #cbdcf1;
+        height: 60px;
+        transform: scaleX(-1);
+    }
+
+    #runnerGame .rg-scene-caption {
+        position: absolute;
+        top: 18px;
+        left: 24px;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: .14em;
+        color: #6c82a8;
+    }
+
+    #runnerGame .rg-ground {
+        height: 55px;
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        background: #edf3fb;
+        border-top: 4px solid #9fb9df;
+    }
+
+    #runnerGame .rg-track {
+        position: absolute;
+        left: -100%;
+        width: 300%;
+        top: 15px;
+        height: 4px;
+        background: repeating-linear-gradient(90deg,#c9d7eb 0,#c9d7eb 18px,transparent 18px,transparent 70px);
+    }
+
+    #runnerGame .rg-player {
+        position: absolute;
+        left: 15%;
+        bottom: 55px;
+        width: 112px;
+        height: 84px;
+        z-index: 3;
+        transform-origin: 50% 90%;
+        will-change: transform;
+    }
+
+        #runnerGame .rg-player svg {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+            display: block;
+        }
+
+    #runnerGame .rg-obstacle {
+        position: absolute;
+        bottom: 55px;
+        left: 65%;
+        width: 38px;
+        height: 43px;
+        border: 2px solid #c98539;
+        border-radius: 7px 7px 3px 3px;
+        background: #ffcf7f;
+        color: #986021;
+        display: grid;
+        place-items: center;
+        font: 700 16px monospace;
+        box-shadow: inset 0 -7px #efb15e;
+        will-change: transform;
+    }
+
+        #runnerGame .rg-obstacle::before {
+            content: '';
+            width: 26px;
+            height: 4px;
+            background: #ffe6b9;
+            border-radius: 3px;
+            position: absolute;
+            top: 4px;
+            left: 4px;
+        }
+
+    #runnerGame .rg-points-pop {
+        position: absolute;
+        left: 19%;
+        bottom: 182px;
+        font: 700 26px 'Space Grotesk',sans-serif;
+        color: #15846a;
+        z-index: 4;
+    }
+
+    #runnerGame .rg-scene-footer {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+        padding: 13px 22px;
+        border-bottom: 1px solid var(--rg-line);
+        font-size: 11px;
+        color: var(--rg-muted);
+    }
+
+        #runnerGame .rg-scene-footer > span:first-child {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            color: #315781;
+            font-weight: 700;
+        }
+
+    #runnerGame .rg-status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #4b86db;
+    }
+
+    #runnerGame .rg-run-controls {
+        display: flex;
+        gap: 10px;
+        padding: 22px 22px 18px;
+    }
+
+    #runnerGame .rg-primary, #runnerGame .rg-secondary {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
+        border-radius: 10px;
+        padding: 12px 20px;
+        min-height: 46px;
+        font-size: 14px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: background .15s;
+        border: 1px solid transparent;
+    }
+
+    #runnerGame .rg-primary {
+        background: var(--rg-blue);
+        color: #fff;
+        box-shadow: 0 4px 10px #2563eb20;
+    }
+
+        #runnerGame .rg-primary:hover {
+            background: #1d4fd0;
+        }
+
+    #runnerGame .rg-secondary {
+        background: #fff;
+        color: var(--rg-ink);
+        border-color: var(--rg-line);
+    }
+
+        #runnerGame .rg-secondary:hover {
+            background: #f3f6fb;
+        }
+
+    #runnerGame :is(.rg-primary,.rg-secondary):disabled {
+        opacity: .48;
+    }
+
+    #runnerGame .rg-how {
+        padding: 0 22px 22px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        color: var(--rg-muted);
+        font-size: 11px;
+    }
+
+        #runnerGame .rg-how b {
+            display: inline-grid;
+            place-items: center;
+            width: 22px;
+            height: 22px;
+            margin-right: 5px;
+            border-radius: 50%;
+            background: #eef3fc;
+            color: #567ca9;
+            font-size: 10px;
+        }
+
+    #runnerGame .rg-question-card {
+        padding: 24px;
+    }
+
+    #runnerGame .rg-question-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+    }
+
+    #runnerGame .rg-badge {
+        font-size: 10px;
+        font-weight: 700;
+        background: #f0f4fa;
+        padding: 5px 9px;
+        border-radius: 20px;
+        color: #667991;
+    }
+
+    #runnerGame #rgQuestionTitle {
+        font-family: 'Space Grotesk',sans-serif !important;
+        font-size: 23px;
+        line-height: 1.3;
+        font-weight: 600;
+        letter-spacing: -.025em;
+        margin: 18px 0 8px;
+    }
+
+    #runnerGame .rg-question-hint {
+        font-size: 13px;
+        color: var(--rg-muted);
+        line-height: 1.6;
+        margin: 0 0 18px;
+    }
+
+    #runnerGame .rg-code-window {
+        border-radius: 12px;
+        overflow: hidden;
+        background: #152640;
+        margin-bottom: 18px;
+    }
+
+    #runnerGame .rg-code-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 11px 13px;
+        color: #a0b5d1;
+        font: 10px monospace;
+        background: #20324d;
+    }
+
+        #runnerGame .rg-code-bar i {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #fb8988;
+            margin-right: 4px;
+        }
+
+            #runnerGame .rg-code-bar i:nth-child(2) {
+                background: #f5cd78;
+            }
+
+            #runnerGame .rg-code-bar i:nth-child(3) {
+                background: #6ad9b0;
+            }
+
+    #runnerGame .rg-code-window pre {
+        margin: 0;
+        min-height: 115px;
+        padding: 20px 17px;
+        overflow-x: auto;
+        white-space: pre;
+    }
+
+    #runnerGame #rgCode {
+        color: #d1eaff;
+        font: 14px/1.75 Consolas,'Courier New',monospace !important;
+    }
+
+    #runnerGame .rg-options {
+        display: grid;
+        grid-template-columns: repeat(2,minmax(0,1fr));
+        gap: 10px;
+    }
+
+    #runnerGame .rg-option {
+        min-width: 0;
+        border: 1px solid #dbe4ef;
+        background: #fff;
+        border-radius: 10px;
+        padding: 12px 10px;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        text-align: left;
+        min-height: 53px;
+        color: var(--rg-ink);
+    }
+
+        #runnerGame .rg-option:not(:disabled):hover {
+            border-color: #6594ef;
+            background: #f2f6ff;
+        }
+
+        #runnerGame .rg-option kbd {
+            flex-shrink: 0;
+            font: 600 10px 'Nunito Sans',sans-serif;
+            color: #788da7;
+            background: #f0f4fa;
+            border-radius: 5px;
+            padding: 3px 6px;
+        }
+
+        #runnerGame .rg-option .rg-option-text {
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            font: 13px/1.5 Consolas,'Courier New',monospace;
+        }
+
+        #runnerGame .rg-option.is-correct {
+            background: #eaf8f0;
+            border-color: #54af80;
+        }
+
+        #runnerGame .rg-option.is-wrong {
+            background: #fff0ed;
+            border-color: #e4887b;
+        }
+
+    #runnerGame .rg-feedback {
+        font-size: 13px;
+        color: var(--rg-muted);
+        line-height: 1.6;
+        margin-top: 18px;
+        min-height: 42px;
+    }
+
+        #runnerGame .rg-feedback.good {
+            color: #177357;
+        }
+
+        #runnerGame .rg-feedback.bad {
+            color: #b54c41;
+        }
+
+    #runnerGame .rg-next {
+        margin-top: 14px;
+        width: 100%;
+    }
+
+    #runnerGame .rg-keyboard {
+        font-size: 11px;
+        color: #8a96a8;
+        margin: 16px 0 0;
+    }
+
+    #runnerGame kbd {
+        background: #eef2f8;
+        color: #69809d;
+        border-radius: 4px;
+        padding: 2px 4px;
+    }
+
+    #runnerGame .rg-note {
+        font-size: 11px;
+        color: #8592a6;
+        text-align: center;
+        margin: 20px 0 0;
+    }
+
+    #runnerGame .rg-result {
+        border: 1px solid #dbe5f2;
+        border-radius: 24px;
+        padding: 32px;
+        width: min(480px,calc(100% - 28px));
+        max-height: calc(100dvh - 32px);
+        overflow-y: auto;
+        color: var(--rg-ink);
+        background: #fff;
+        box-shadow: 0 25px 90px #0d23494d;
+        text-align: center;
+    }
+
+        #runnerGame .rg-result::backdrop {
+            background: #10213d99;
+            backdrop-filter: blur(5px);
+        }
+
+    #runnerGame .rg-close {
+        position: absolute;
+        right: 13px;
+        top: 10px;
+        border: 0;
+        border-radius: 8px;
+        background: transparent;
+        width: 36px;
+        height: 36px;
+        font-size: 26px;
+        color: #7a89a0;
+    }
+
+    #runnerGame .rg-result-symbol {
+        margin: 0 auto 15px;
+        width: 54px;
+        height: 54px;
+        border-radius: 16px;
+        background: #edf3ff;
+        color: var(--rg-blue);
+        display: grid;
+        place-items: center;
+        font: 700 20px monospace;
+    }
+
+    #runnerGame #rgResultTitle {
+        font-family: 'Space Grotesk',sans-serif !important;
+        font-size: 30px;
+        font-weight: 700;
+        margin: 8px 0;
+        letter-spacing: -.04em;
+    }
+
+    #runnerGame #rgResultMessage {
+        font-size: 14px;
+        color: var(--rg-muted);
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    #runnerGame .rg-final-score {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 15px 0;
+    }
+
+        #runnerGame .rg-final-score strong {
+            font: 700 64px/1.2 'Space Grotesk',sans-serif;
+            color: var(--rg-blue);
+        }
+
+        #runnerGame .rg-final-score span {
+            font-size: 10px;
+            letter-spacing: .14em;
+            color: var(--rg-muted);
+            font-weight: 700;
+        }
+
+    #runnerGame .rg-result-stats {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        color: var(--rg-muted);
+        font-size: 12px;
+    }
+
+    #runnerGame .rg-review {
+        padding: 14px 16px;
+        margin-top: 22px;
+        border-radius: 12px;
+        background: #f5f8fc;
+        text-align: left;
+    }
+
+        #runnerGame .rg-review strong {
+            font-size: 12px;
+            color: #466084;
+        }
+
+        #runnerGame .rg-review pre {
+            margin: 8px 0;
+            white-space: pre-wrap;
+            color: #172c48;
+            font: 14px/1.5 Consolas,monospace;
+        }
+
+        #runnerGame .rg-review p {
+            font-size: 13px;
+            color: var(--rg-muted);
+            margin: 0;
+        }
+
+    #runnerGame .rg-result-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 23px;
+    }
+
+    #runnerGame .rg-player.is-crashed {
+        filter: grayscale(.8);
+    }
+
+@media (max-width:1150px) {
+    #runnerGame .rg-layout {
+        grid-template-columns: minmax(0,1fr);
+    }
+
+    #runnerGame .rg-question-card {
+        max-width: none;
+    }
+
+    #runnerGame .rg-scene {
+        height: 300px;
+    }
+}
+
+@media (max-width:520px) {
+    #runnerGame .rg-heading {
+        gap: 10px;
+    }
+
+    #runnerGame .rg-best {
+        min-width: 64px;
+    }
+
+        #runnerGame .rg-best small {
+            display: none;
+        }
+
+        #runnerGame .rg-best > span {
+            font-size: 8px;
+            max-width: 65px;
+        }
+
+    #runnerGame .rg-subtitle {
+        font-size: 13px;
+    }
+
+    #runnerGame .rg-scoreboard {
+        padding: 16px;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    #runnerGame .rg-icon-button {
+        font-size: 10px;
+    }
+
+    #runnerGame .rg-question-card {
+        padding: 19px;
+    }
+
+    #runnerGame .rg-result {
+        padding: 24px 18px;
+    }
+
+    #runnerGame .rg-scene {
+        height: 290px;
+    }
+
+    #runnerGame .rg-player {
+        width: 96px;
+        height: 72px;
+    }
+
+    #runnerGame .rg-options {
+        gap: 8px;
+    }
+}
+
+@media (prefers-reduced-motion:reduce) {
+    #runnerGame *, #runnerGame *::before, #runnerGame *::after {
+        transition: none !important;
+        animation: none !important;
+    }
+}
